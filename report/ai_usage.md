@@ -11,4 +11,9 @@ For each entry: date, tool, what it was used for, which files or text came from 
 
 ## Jiahao Zhou
 
+- 2026-11-07, OpenAI Codex: generated the hybrid CPU/GPU solvers, validation drivers,
+  and draft sections 4 and 8. The OpenMP results were checked against the discrete
+  sine-mode solution. CUDA sources were compiled with NVIDIA nvcc; GPU execution
+  and team review are pending.
+
 ## Zheke Chen
