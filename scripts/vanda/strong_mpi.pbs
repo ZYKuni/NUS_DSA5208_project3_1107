@@ -1,0 +1,19 @@
+#!/bin/bash
+# Strong scaling, pure MPI: fixed global n, ranks = 1 .. 288 (4 nodes x 72 cores).
+# Submit: qsub -v DIM=2,N=4096 scripts/vanda/strong_mpi.pbs
+# Owner: C. TODO(C): set queue name (-q) and project code (-P) for our allocation.
+#PBS -N pcg_strong
+#PBS -l select=4:ncpus=72:mpiprocs=72
+#PBS -l walltime=02:00:00
+#PBS -j oe
+
+cd "$PBS_O_WORKDIR"
+source scripts/vanda/env.sh
+DIM=${DIM:-2}; N=${N:-4096}
+OUT=results/strong_mpi_${DIM}d.csv
+export OMP_NUM_THREADS=1
+for P in 1 2 4 8 16 32 64 72 144 216 288; do
+  for DEC in slab cart; do
+    mpirun -np $P build/bin/poisson_mpi --dim $DIM --n $N --decomp $DEC --repeat 3 --csv $OUT
+  done
+done

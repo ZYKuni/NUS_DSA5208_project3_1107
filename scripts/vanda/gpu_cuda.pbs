@@ -1,0 +1,16 @@
+#!/bin/bash
+# MPI + CUDA on 1..4 GPUs, one rank per GPU.
+# Submit: qsub -v DIM=3,N=512 scripts/vanda/gpu_cuda.pbs
+# TODO(C): GPU queue name and GPUs per node on Vanda (run `hpc gpu` for a sample script).
+#PBS -N pcg_gpu
+#PBS -l select=1:ncpus=16:ngpus=4:mpiprocs=4
+#PBS -l walltime=01:00:00
+#PBS -j oe
+
+cd "$PBS_O_WORKDIR"
+source scripts/vanda/env.sh
+DIM=${DIM:-3}; N=${N:-512}
+OUT=results/gpu_cuda_${DIM}d.csv
+for G in 1 2 4; do
+  mpirun -np $G build/bin/poisson_cuda --dim $DIM --n $N --repeat 3 --csv $OUT
+done

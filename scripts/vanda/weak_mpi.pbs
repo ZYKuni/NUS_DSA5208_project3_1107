@@ -1,0 +1,19 @@
+#!/bin/bash
+# Weak scaling, pure MPI: constant points per rank.
+# 2D: n = N0 * sqrt(P);  3D: n = N0 * cbrt(P)  (use P that make n an integer).
+# Submit: qsub -v DIM=2,N0=512 scripts/vanda/weak_mpi.pbs
+#PBS -N pcg_weak
+#PBS -l select=4:ncpus=72:mpiprocs=72
+#PBS -l walltime=02:00:00
+#PBS -j oe
+
+cd "$PBS_O_WORKDIR"
+source scripts/vanda/env.sh
+DIM=${DIM:-2}; N0=${N0:-512}
+OUT=results/weak_mpi_${DIM}d.csv
+export OMP_NUM_THREADS=1
+if [ "$DIM" = 2 ]; then PS="1 4 16 64 256"; else PS="1 8 64 216"; fi
+for P in $PS; do
+  N=$(python3 -c "import math;print(round($N0*($P**(1/$DIM))))")
+  mpirun -np $P build/bin/poisson_mpi --dim $DIM --n $N --repeat 3 --csv $OUT
+done

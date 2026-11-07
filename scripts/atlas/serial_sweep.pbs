@@ -1,0 +1,17 @@
+#!/bin/bash
+# Serial runtime vs problem size (5-point grading item).
+# Submit on Atlas: qsub scripts/atlas/serial_sweep.pbs
+# TODO(C): set Atlas queue name.
+#PBS -N pcg_serial
+#PBS -l select=1:ncpus=1
+#PBS -l walltime=04:00:00
+#PBS -j oe
+
+cd "$PBS_O_WORKDIR"
+source scripts/atlas/env.sh
+for N in 64 128 256 512 1024 2048 4096; do
+  build/bin/poisson_serial --dim 2 --n $N --repeat 3 --csv results/serial_2d.csv
+done
+for N in 16 32 64 128 256; do
+  build/bin/poisson_serial --dim 3 --n $N --repeat 3 --csv results/serial_3d.csv
+done

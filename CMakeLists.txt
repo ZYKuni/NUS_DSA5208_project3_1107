@@ -1,78 +1,90 @@
-cmake_minimum_required(VERSION 3.16)
-project(project3_poisson LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.18)
+project(poisson_cg LANGUAGES CXX)
+
+# ---------------------------------------------------------------------------
+# Options (same names on laptop, Atlas and Vanda)
+# ---------------------------------------------------------------------------
+option(ENABLE_MPI    "Build MPI and hybrid executables" ON)
+option(ENABLE_OPENMP "Build MPI+OpenMP executable"      ON)
+option(ENABLE_CUDA   "Build MPI+CUDA executable"        OFF)
+option(BUILD_TESTS   "Build validation tests"           ON)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-option(ENABLE_SANITIZERS "Enable address and undefined behavior checks" OFF)
-option(ENABLE_OPENMP "Build OpenMP kernels and hybrid solver" OFF)
-option(ENABLE_MPI "Build MPI-only Sendrecv and overlap solvers" OFF)
-add_library(poisson_core src/grid.cpp src/kernel_serial.cpp src/solver_serial.cpp src/cli.cpp src/decomposition.cpp)
-target_include_directories(poisson_core PUBLIC include)
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
-  target_compile_options(poisson_core PUBLIC -Wall -Wextra -Wpedantic)
-  if(ENABLE_SANITIZERS)
-    target_compile_options(poisson_core PUBLIC -fsanitize=address,undefined -fno-omit-frame-pointer)
-    target_link_options(poisson_core PUBLIC -fsanitize=address,undefined)
-  endif()
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
-add_executable(poisson_serial src/serial_main.cpp)
-target_link_libraries(poisson_serial PRIVATE poisson_core)
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+# No BLAS / LAPACK anywhere in this project (course rule).
+
+# ---------------------------------------------------------------------------
+# Shared code: CLI parser, CSV writer, timers, model problem
+# ---------------------------------------------------------------------------
+file(GLOB COMMON_SRC CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/common/*.cpp)
+add_library(pcg_common STATIC ${COMMON_SRC})
+target_include_directories(pcg_common PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_compile_options(pcg_common PRIVATE -Wall -Wextra)
+
+# Helper: add an executable only once its main file exists, so the skeleton
+# builds before every implementation is written.
+#   pcg_add_app(<target> <main.cpp> <src subdir>)
+function(pcg_add_app target main subdir)
+  if(NOT EXISTS ${CMAKE_SOURCE_DIR}/apps/${main})
+    message(STATUS "skip ${target}: apps/${main} not written yet")
+    set(PCG_APP_ADDED FALSE PARENT_SCOPE)
+    return()
+  endif()
+  file(GLOB SRC CONFIGURE_DEPENDS
+       ${CMAKE_SOURCE_DIR}/src/${subdir}/*.cpp
+       ${CMAKE_SOURCE_DIR}/src/${subdir}/*.cu)
+  add_executable(${target} ${CMAKE_SOURCE_DIR}/apps/${main} ${SRC})
+  target_link_libraries(${target} PRIVATE pcg_common)
+  target_compile_options(${target} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra>)
+  set(PCG_APP_ADDED TRUE PARENT_SCOPE)
+endfunction()
+
+# Serial (owner: A)
+pcg_add_app(poisson_serial poisson_serial.cpp serial)
+
+# Pure MPI (owner: A)
 if(ENABLE_MPI)
   find_package(MPI REQUIRED COMPONENTS CXX)
-  add_library(poisson_mpi_core src/halo.cpp src/solver_mpi.cpp)
-  target_link_libraries(poisson_mpi_core PUBLIC poisson_core MPI::MPI_CXX)
-  add_executable(poisson_mpi src/mpi_main.cpp)
-  target_link_libraries(poisson_mpi PRIVATE poisson_mpi_core)
-endif()
-if(ENABLE_OPENMP)
-  find_package(OpenMP REQUIRED COMPONENTS CXX)
-  add_library(poisson_openmp_core src/kernel_openmp.cpp)
-  target_link_libraries(poisson_openmp_core PUBLIC poisson_core OpenMP::OpenMP_CXX)
-  add_executable(poisson_openmp src/c_hybrid_main.cpp)
-  target_link_libraries(poisson_openmp PRIVATE poisson_openmp_core)
-  if(ENABLE_MPI)
-    add_executable(poisson_hybrid src/hybrid_main.cpp)
-    target_link_libraries(poisson_hybrid PRIVATE poisson_openmp_core poisson_mpi_core)
+  pcg_add_app(poisson_mpi poisson_mpi.cpp mpi)
+  if(PCG_APP_ADDED)
+    target_link_libraries(poisson_mpi PRIVATE MPI::MPI_CXX)
   endif()
-endif()
-include(CTest)
-if(BUILD_TESTING)
-  add_executable(test_core tests/test_core.cpp)
-  target_link_libraries(test_core PRIVATE poisson_core)
-  add_test(NAME core_contract COMMAND test_core)
-  add_executable(test_decomposition tests/test_decomposition.cpp)
-  target_link_libraries(test_decomposition PRIVATE poisson_core)
-  add_test(NAME decomposition_contract COMMAND test_decomposition)
-  find_package(Python3 3.8 COMPONENTS Interpreter REQUIRED)
-  add_test(NAME serial_validation COMMAND ${Python3_EXECUTABLE}
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_serial.py
-    --exe $<TARGET_FILE:poisson_serial>
-    --output ${CMAKE_CURRENT_BINARY_DIR}/validation)
-  add_test(NAME grid_comparison_contract COMMAND ${Python3_EXECUTABLE}
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_compare_grids.py)
-  add_test(NAME acceptance_contract COMMAND ${Python3_EXECUTABLE}
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_acceptance.py --exe $<TARGET_FILE:poisson_serial>)
-  set_tests_properties(core_contract serial_validation grid_comparison_contract acceptance_contract
-    PROPERTIES TIMEOUT 120)
-  add_test(NAME experiment_metrics COMMAND ${Python3_EXECUTABLE}
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_experiments.py)
+
+  # MPI + OpenMP (owner: B)
   if(ENABLE_OPENMP)
-    add_executable(test_openmp tests/test_openmp.cpp)
-    target_link_libraries(test_openmp PRIVATE poisson_openmp_core)
-    add_test(NAME openmp_contract COMMAND test_openmp)
-    add_test(NAME parallel_acceptance COMMAND ${Python3_EXECUTABLE}
-      ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_parallel.py --bin-dir ${CMAKE_CURRENT_BINARY_DIR}
-      --output ${CMAKE_CURRENT_BINARY_DIR}/parallel-acceptance
-      --mpiexec "${MPIEXEC_EXECUTABLE}")
-    set_tests_properties(openmp_contract PROPERTIES TIMEOUT 120)
-    set_tests_properties(parallel_acceptance PROPERTIES TIMEOUT 600 PROCESSORS 4)
+    find_package(OpenMP REQUIRED COMPONENTS CXX)
+    pcg_add_app(poisson_omp poisson_omp.cpp hybrid_omp)
+    if(PCG_APP_ADDED)
+      target_link_libraries(poisson_omp PRIVATE MPI::MPI_CXX OpenMP::OpenMP_CXX)
+    endif()
   endif()
-  if(ENABLE_MPI)
-    add_test(NAME mpi_validation COMMAND ${Python3_EXECUTABLE}
-      ${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_mpi.py
-      --exe $<TARGET_FILE:poisson_mpi> --serial $<TARGET_FILE:poisson_serial>
-      --mpiexec ${MPIEXEC_EXECUTABLE} --numproc-flag=${MPIEXEC_NUMPROC_FLAG}
-      --output ${CMAKE_CURRENT_BINARY_DIR}/mpi-validation)
-    set_tests_properties(mpi_validation PROPERTIES TIMEOUT 240 PROCESSORS 4)
+
+  # MPI + CUDA (owner: B). On Vanda: module load nvhpc-hpcx-cuda12/26.1
+  if(ENABLE_CUDA)
+    enable_language(CUDA)
+    if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+      set(CMAKE_CUDA_ARCHITECTURES 80) # A100; C to confirm Vanda GPU model
+    endif()
+    pcg_add_app(poisson_cuda poisson_cuda.cpp hybrid_cuda)
+    if(PCG_APP_ADDED)
+      target_link_libraries(poisson_cuda PRIVATE MPI::MPI_CXX)
+    endif()
   endif()
+endif()
+
+# ---------------------------------------------------------------------------
+# Tests
+# ---------------------------------------------------------------------------
+if(BUILD_TESTS)
+  enable_testing()
+  add_executable(test_common ${CMAKE_SOURCE_DIR}/tests/test_common.cpp)
+  target_link_libraries(test_common PRIVATE pcg_common)
+  add_test(NAME common COMMAND test_common)
 endif()
