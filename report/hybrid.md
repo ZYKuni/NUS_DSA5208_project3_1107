@@ -7,12 +7,15 @@ layer stores neighbouring values of the CG search direction. Physical boundary
 ghosts remain zero. The baseline uses standard CG with blocking exchange and two
 global scalar sums per iteration.
 
-The CPU version enters one OpenMP parallel region per iteration. The primary
-thread alone issues MPI calls under MPI_THREAD_FUNNELED. Threads share the
-stencil and vector updates by static work sharing and compute thread-local
-dot products before the MPI sum. Rank boundaries exchange strided faces using MPI
-subarray datatypes. At fixed core count, increasing threads per rank changes
-both the number of MPI participants and the surface area of each partition.
+The CPU version reuses the pure MPI backend and replaces only its compute kernels.
+Decomposition, halo exchange (blocking or overlapped), reductions and both CG
+variants are therefore identical to the MPI solver. Each kernel is an OpenMP
+parallel loop: the stencil distributes grid rows over threads and keeps the
+contiguous x loop inside a thread for vectorisation, and the dot products use an
+OpenMP reduction before the MPI sum. The primary thread alone issues MPI calls,
+outside parallel regions, under MPI_THREAD_FUNNELED. At fixed core count,
+increasing threads per rank changes both the number of MPI participants and the
+surface area of each partition.
 
 The GPU version assigns one device to each rank. The solution, residual, operator
 output and ghosted search direction remain on the device throughout the solve.
@@ -26,13 +29,13 @@ ghost cells. Timers synchronize device work before closing each phase.
 
 ## 8. Hybrid and GPU results
 
-Local correctness checks used n=15 and n=31, halving the spacing on refinement.
-The discrete sine mode has eigenvalue 4d sin²(πh/2)/h². Its sampled solution is
-therefore scaled by (πh/(2 sin(πh/2)))². The measured OpenMP error agreed with
-the resulting discrete L2 error within relative tolerance 1e−6 in both dimensions.
-The coarse-to-fine error ratio was 4.00579. This right-hand side is a single
-eigenmode, so a small-grid solve commonly takes one iteration. Report the actual
-iteration count beside each timing, especially when interpreting short runs.
+Local correctness checks used n=15 and n=31, halving the spacing on refinement,
+with the manufactured solution of Section 1. The OpenMP solver matched the serial
+solver's iteration count and discrete L2 error (relative tolerance 1e-6) for one
+and several ranks, slab and Cartesian partitions, in both dimensions, and every
+grid point matched the serial solution to rounding error (test_omp). The
+coarse-to-fine error ratio was 3.999. The CUDA checks use the same script on a
+GPU node.
 
 Cluster results await C's measurements. For the fixed-core experiment compare
 the fastest of three repeats per rank/thread split at the same global size.

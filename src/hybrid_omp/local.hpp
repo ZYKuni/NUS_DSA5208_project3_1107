@@ -1,4 +1,4 @@
-// Collective operations: every thread in the existing OpenMP team calls these.
+// Tile layout used by the MPI+CUDA solver (src/hybrid_cuda).
 #pragma once
 #include <cstddef>
 
@@ -13,11 +13,4 @@ struct Tile {
     }
 };
 
-// Direction has a one-cell ghost layer. Other vectors contain interiors only.
-void omp_stencil(Tile t, int dim, double inv_h2, const double* direction, double* applied);
-// Each thread returns its own partial sum; combine before the MPI reduction.
-double omp_dot_partial(std::size_t n, const double* a, const double* b);
-void omp_update(std::size_t n, double alpha, const double* direction, const double* applied,
-                double* solution, double* residual, Tile t);
-void omp_direction(Tile t, double beta, const double* residual, double* direction);
 } // namespace pcg

@@ -14,6 +14,10 @@ For each entry: date, tool, what it was used for, which files or text came from 
   It also flagged that the original manufactured solution Π sin(π x_k) is a discrete eigenvector
   (CG converged in one iteration) and replaced it. Checked by running the tests on 1, 3, 4, 6 and
   8 MPI ranks and by reviewing the code.
+- 2026-11-08, Claude: reviewed branch b/hybrid, rewrote the MPI+OpenMP solver as `OmpBackend`
+  on top of the MPI backend (`src/hybrid_omp/omp_backend.*`, `apps/poisson_omp.cpp`), added
+  `test_omp`, and updated `src/hybrid_omp/checks/validate.py` and report/hybrid.md for the new
+  manufactured solution. Checked with ctest and by timing against the pure MPI solver.
 
 ## Jiahao Zhou
 
