@@ -21,11 +21,15 @@ int main() {
     r.cg = "std";
     std::string row = pcg::csv_row(r);
     int commas_row = 0, commas_hdr = 0;
-    for (char c : row) commas_row += (c == ',');
-    for (const char* c = pcg::csv_header(); *c; ++c) commas_hdr += (*c == ',');
+    for (char c : row)
+        commas_row += (c == ',');
+    for (const char* c = pcg::csv_header(); *c; ++c)
+        commas_hdr += (*c == ',');
     assert(commas_row == commas_hdr);
 
-    assert(std::abs(pcg::exact_u(2, 0.5, 0.5, 0.0) - 1.0) < 1e-12);
+    // u(0.5, 0.5) = (0.25 e^0.5)^2 = e / 16; u vanishes on the boundary.
+    assert(std::abs(pcg::exact_u(2, 0.5, 0.5, 0.0) - std::exp(1.0) / 16.0) < 1e-12);
+    assert(pcg::exact_u(3, 0.0, 0.3, 0.7) == 0.0 && pcg::exact_u(3, 0.3, 0.7, 1.0) == 0.0);
     std::printf("test_common: OK\n");
     return 0;
 }

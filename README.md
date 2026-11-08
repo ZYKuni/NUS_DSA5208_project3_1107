@@ -14,14 +14,17 @@ We solve -Δu = f on the unit square (2D) and unit cube (3D) with u = 0 on the b
 A 5-point (2D) or 7-point (3D) finite-difference stencil gives a sparse symmetric
 positive-definite system Au = b, solved with the conjugate gradient (CG) method.
 A is never stored: each matrix-vector product is a stencil sweep (matrix-free).
-The right-hand side comes from the manufactured solution u(x) = Π sin(π x_k), so the
-discretisation error can be measured exactly. No BLAS or LAPACK is used.
+The right-hand side comes from the manufactured solution u(x) = Π x_k (1 − x_k) e^{x_k}, so the
+discretisation error can be measured exactly. (We deliberately avoid u = Π sin(π x_k): it is an
+exact eigenvector of the discrete Laplacian, so CG would converge in a single iteration.)
+No BLAS or LAPACK is used.
 
 ## Repository layout
 
 ```
-include/          shared headers: CLI parameters, timers, CSV format, model problem
-src/common/       shared implementation (CLI parser, CSV writer)
+include/          shared headers: CLI parameters, timers, CSV format, model problem,
+                  grid block + stencil kernels (grid.hpp), CG driver + Backend interface (cg.hpp)
+src/common/       shared implementation (CLI parser, CSV writer, kernels, CG driver)
 src/serial/       serial CG                          (owner: Yikun)
 src/mpi/          pure MPI CG                        (owner: Yikun)
 src/hybrid_omp/   MPI + OpenMP CG                    (owner: Jiahao)
@@ -128,8 +131,20 @@ python3 analysis/collect.py && python3 analysis/plots.py
 
 ## Validation
 
-TODO: describe the convergence-order test (error should fall as O(h^2)) and the
-serial-vs-parallel agreement test once they are implemented in `tests/`.
+`ctest --test-dir build --output-on-failure` runs:
+
+| Test | What it checks |
+| --- | --- |
+| `common` | CLI parser, CSV format, manufactured solution |
+| `serial` | A is symmetric positive definite; err_l2 falls as O(h²) (observed order 2.00 in 2D and 3D); standard and single-reduction CG give the same iterations and error |
+| `mpi_np1`, `mpi_np3`, `mpi_np4` | every `--decomp` × `--halo` × `--cg` combination, 2D and 3D, uneven splits and one-point-thick blocks: same iteration count as serial (±1), same err_l2 (1e-6 relative), and every grid point equal to the serial solution (max-norm, 1e-8 relative) |
+
+The MPI test can be run on any number of ranks: `mpirun -np 8 build/bin/test_mpi`.
+With Open MPI on a machine with fewer cores than ranks, configure with
+`-DPCG_MPIEXEC_EXTRA="--oversubscribe"`.
+
+Every run also reports `rel_res`, the true residual ‖b − A x‖/‖b‖ recomputed after the solve,
+and `err_l2`, the discrete L2 error √(h^d Σ (x − u)²) against the manufactured solution.
 
 ## AI usage
 
