@@ -22,3 +22,8 @@ done
 ```
 
 Use at least two ranks to exercise a real halo transfer. With one GPU the run checks the local solver and does not measure inter-GPU transport.
+
+The final `rel_res` is recomputed as the true residual `||b-Ax||/||b||`, outside
+the timed solve, rather than reporting only the recursive CG residual. The
+shared manufactured problem and serial comparison are checked by
+`scripts/check_workload.py`; see `scripts/vanda/STEP2.md` for the cluster pilot.

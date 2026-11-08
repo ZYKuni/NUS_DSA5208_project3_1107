@@ -1,0 +1,10 @@
+#!/bin/bash -l
+# Submit from repository root with qsub -P YOUR_PROJECT.
+#PBS -N pcg-workload-gpu
+#PBS -q auto
+#PBS -l select=1:ncpus=36:mpiprocs=4:ompthreads=1:ngpus=1:node_pool=cpu_node
+#PBS -l walltime=00:15:00
+#PBS -j oe
+set -euo pipefail
+cd "${PBS_O_WORKDIR:?}"
+bash scripts/vanda/run_workload_check.sh cuda

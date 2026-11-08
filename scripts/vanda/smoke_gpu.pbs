@@ -1,0 +1,36 @@
+#!/bin/bash -l
+# Submit from repository root: qsub -P YOUR_PROJECT scripts/vanda/smoke_gpu.pbs
+# CPU:GPU ratio follows `hpc gpu`; one GPU, one MPI rank; not a benchmark.
+#PBS -N pcg-smoke-gpu
+#PBS -q auto
+# This pool also advertises A40 GPUs; ngpus=1 reserves and charges a GPU.
+#PBS -l select=1:ncpus=36:mpiprocs=1:ompthreads=1:ngpus=1:node_pool=cpu_node
+#PBS -l walltime=00:10:00
+#PBS -j oe
+set -euo pipefail
+cd "${PBS_O_WORKDIR:?}"
+evidence="$PWD/results/raw/step1-gpu-${PBS_JOBID:?}"
+mkdir -p "$evidence"
+trap 'rc=$?; printf "%s\n" "$rc" > "$evidence/exit_code.txt"' EXIT
+exec > >(tee "$evidence/job.log") 2>&1
+date -u +%Y-%m-%dT%H:%M:%SZ
+qstat -f "$PBS_JOBID" > "$evidence/scheduler.txt"
+hostname
+lscpu
+nvidia-smi
+source scripts/vanda/env.sh
+module list
+mpicxx --showme
+mpiexec --version
+nvcc --version
+cmake --version
+nvidia-smi --query-gpu=name,compute_cap,memory.total --format=csv
+export PCG_CUDA_ARCH
+PCG_CUDA_ARCH=$(nvidia-smi --query-gpu=compute_cap --format=csv,noheader | head -n 1 | tr -d '. ')
+[[ "$PCG_CUDA_ARCH" =~ ^[0-9]+$ ]]
+export PCG_BUILD_JOBS=2 OMP_NUM_THREADS=1
+bash scripts/build.sh smoke-cuda build-smoke-gpu
+cp build-smoke-gpu/compile_commands.json "$evidence/compile_commands.json"
+sha256sum scripts/smoke/gpu.cu build-smoke-gpu/bin/cluster_gpu_smoke > "$evidence/source_binary.sha256"
+mpiexec -n 1 --bind-to core --report-bindings build-smoke-gpu/bin/cluster_gpu_smoke
+printf 'STEP1_GPU_COMPLETE\n'

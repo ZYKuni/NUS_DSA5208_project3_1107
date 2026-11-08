@@ -1,0 +1,19 @@
+{
+  "platform": "vanda",
+  "job_id": "1532579.stdct-mgmt-02",
+  "problem": "product x(1-x)exp(x); continuous manufactured RHS; zero initial guess",
+  "problem_header_sha256": "f7a64547ddd0f9fe7e0020514b3cf8edb4c0d5a5595ee59f8b4d24a0aa539860",
+  "binary_sha256": {
+    "serial": "1245cc0718eb9228aa4032ae1e1dc3a5395c3e93d70eb4b1e00d7f78d4566729",
+    "mpi": "c96fadba967d9e32de3d12c30df1f2a9d0600b838ed78f509a7e4e620a67377b",
+    "omp": "1c067bc888c410544d2c68ae57663c73deddd3cbf5201a0c1f92b61375ec0f70"
+  },
+  "environment": {
+    "OMP_PLACES": "cores",
+    "OMP_PROC_BIND": "FALSE",
+    "OMP_WAIT_POLICY": "PASSIVE",
+    "PCG_CUDA_HALO": null
+  },
+  "repetition_policy": "independent processes, --repeat 1; keep all samples",
+  "min_solve_seconds": 1.0
+}

@@ -1,0 +1,16 @@
+{
+  "1532579.stdct-mgmt-02": {
+    "exit_status": 0,
+    "samples": 54,
+    "exec_host": "CN-149/3*8",
+    "allocation": "1:ncpus=8:mpiprocs=4:ompthreads=2:mem=55GB:node_pool=cpu_node",
+    "workload_pass": true
+  },
+  "1532562.stdct-mgmt-02": {
+    "exit_status": 0,
+    "samples": 36,
+    "exec_host": "GN-A40-047/1*36",
+    "allocation": "1:ncpus=36:mpiprocs=4:ompthreads=1:ngpus=1:node_pool=cpu_node:mem=240GB",
+    "workload_pass": true
+  }
+}
