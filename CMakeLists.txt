@@ -28,42 +28,60 @@ add_library(pcg_common STATIC ${COMMON_SRC})
 target_include_directories(pcg_common PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_compile_options(pcg_common PRIVATE -Wall -Wextra)
 
+# Serial backend (owner: A). A library so tests and other backends can link it.
+file(GLOB SERIAL_SRC CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/serial/*.cpp)
+add_library(pcg_serial STATIC ${SERIAL_SRC})
+target_include_directories(pcg_serial PUBLIC ${CMAKE_SOURCE_DIR}/src/serial)
+target_link_libraries(pcg_serial PUBLIC pcg_common)
+target_compile_options(pcg_serial PRIVATE -Wall -Wextra)
+
 # Helper: add an executable only once its main file exists, so the skeleton
 # builds before every implementation is written.
-#   pcg_add_app(<target> <main.cpp> <src subdir>)
+#   pcg_add_app(<target> <main.cpp> <src subdir or ""> [libraries...])
+# Sources in src/<subdir>/ (*.cpp, *.cu) are compiled into the executable.
 function(pcg_add_app target main subdir)
   if(NOT EXISTS ${CMAKE_SOURCE_DIR}/apps/${main})
     message(STATUS "skip ${target}: apps/${main} not written yet")
     set(PCG_APP_ADDED FALSE PARENT_SCOPE)
     return()
   endif()
-  file(GLOB SRC CONFIGURE_DEPENDS
-       ${CMAKE_SOURCE_DIR}/src/${subdir}/*.cpp
-       ${CMAKE_SOURCE_DIR}/src/${subdir}/*.cu)
+  set(SRC "")
+  if(NOT "${subdir}" STREQUAL "")
+    file(GLOB SRC CONFIGURE_DEPENDS
+         ${CMAKE_SOURCE_DIR}/src/${subdir}/*.cpp
+         ${CMAKE_SOURCE_DIR}/src/${subdir}/*.cu)
+  endif()
   add_executable(${target} ${CMAKE_SOURCE_DIR}/apps/${main} ${SRC})
-  target_link_libraries(${target} PRIVATE pcg_common)
+  if(NOT "${subdir}" STREQUAL "")
+    target_include_directories(${target} PRIVATE ${CMAKE_SOURCE_DIR}/src/${subdir})
+  endif()
+  target_link_libraries(${target} PRIVATE pcg_common ${ARGN})
   target_compile_options(${target} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra>)
   set(PCG_APP_ADDED TRUE PARENT_SCOPE)
 endfunction()
 
 # Serial (owner: A)
-pcg_add_app(poisson_serial poisson_serial.cpp serial)
+pcg_add_app(poisson_serial poisson_serial.cpp "" pcg_serial)
 
-# Pure MPI (owner: A)
 if(ENABLE_MPI)
   find_package(MPI REQUIRED COMPONENTS CXX)
-  pcg_add_app(poisson_mpi poisson_mpi.cpp mpi)
-  if(PCG_APP_ADDED)
-    target_link_libraries(poisson_mpi PRIVATE MPI::MPI_CXX)
-  endif()
+
+  # Pure MPI backend (owner: A): decomposition, halo exchange, MpiBackend.
+  # The hybrid versions link it too and derive from MpiBackend.
+  file(GLOB MPI_SRC CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/mpi/*.cpp)
+  add_library(pcg_mpi STATIC ${MPI_SRC})
+  target_include_directories(pcg_mpi PUBLIC ${CMAKE_SOURCE_DIR}/src/mpi)
+  target_link_libraries(pcg_mpi PUBLIC pcg_common MPI::MPI_CXX)
+  # Skip the deprecated MPI C++ bindings (we use the C API); silences their warnings.
+  target_compile_definitions(pcg_mpi PUBLIC OMPI_SKIP_MPICXX MPICH_SKIP_MPICXX)
+  target_compile_options(pcg_mpi PRIVATE -Wall -Wextra)
+
+  pcg_add_app(poisson_mpi poisson_mpi.cpp "" pcg_mpi)
 
   # MPI + OpenMP (owner: B)
   if(ENABLE_OPENMP)
     find_package(OpenMP REQUIRED COMPONENTS CXX)
-    pcg_add_app(poisson_omp poisson_omp.cpp hybrid_omp)
-    if(PCG_APP_ADDED)
-      target_link_libraries(poisson_omp PRIVATE MPI::MPI_CXX OpenMP::OpenMP_CXX)
-    endif()
+    pcg_add_app(poisson_omp poisson_omp.cpp hybrid_omp pcg_mpi OpenMP::OpenMP_CXX)
   endif()
 
   # MPI + CUDA (owner: B). On Vanda: module load nvhpc-hpcx-cuda12/26.1
@@ -72,10 +90,7 @@ if(ENABLE_MPI)
     if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
       set(CMAKE_CUDA_ARCHITECTURES 80) # A100; C to confirm Vanda GPU model
     endif()
-    pcg_add_app(poisson_cuda poisson_cuda.cpp hybrid_cuda)
-    if(PCG_APP_ADDED)
-      target_link_libraries(poisson_cuda PRIVATE MPI::MPI_CXX)
-    endif()
+    pcg_add_app(poisson_cuda poisson_cuda.cpp hybrid_cuda pcg_mpi)
   endif()
 endif()
 
@@ -87,4 +102,23 @@ if(BUILD_TESTS)
   add_executable(test_common ${CMAKE_SOURCE_DIR}/tests/test_common.cpp)
   target_link_libraries(test_common PRIVATE pcg_common)
   add_test(NAME common COMMAND test_common)
+
+  # Serial solver: O(h^2) convergence, std vs pipe agreement.
+  add_executable(test_serial ${CMAKE_SOURCE_DIR}/tests/test_serial.cpp)
+  target_link_libraries(test_serial PRIVATE pcg_serial)
+  add_test(NAME serial COMMAND test_serial)
+
+  # MPI solver vs serial, every decomp x halo x cg variant, on 1, 3 and 4 ranks.
+  # Extra launcher flags (e.g. --oversubscribe) via -DPCG_MPIEXEC_EXTRA="...".
+  if(ENABLE_MPI)
+    set(PCG_MPIEXEC_EXTRA "" CACHE STRING "Extra flags for mpiexec in tests")
+    separate_arguments(_pcg_extra UNIX_COMMAND "${PCG_MPIEXEC_EXTRA}")
+    add_executable(test_mpi ${CMAKE_SOURCE_DIR}/tests/test_mpi.cpp)
+    target_link_libraries(test_mpi PRIVATE pcg_mpi pcg_serial)
+    foreach(np 1 3 4)
+      add_test(NAME mpi_np${np}
+               COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np} ${_pcg_extra}
+                       ${MPIEXEC_PREFLAGS} $<TARGET_FILE:test_mpi> ${MPIEXEC_POSTFLAGS})
+    endforeach()
+  endif()
 endif()

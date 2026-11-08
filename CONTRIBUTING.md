@@ -23,8 +23,25 @@
 - 禁止使用 BLAS / LAPACK / cuBLAS / PETSc 等线性代数库（课程规定）。
 - 所有可执行文件必须用 `include/params.hpp` 的 `parse_args`，命令行参数完全一致。
 - 所有可执行文件必须通过 `include/csv.hpp` 的 `csv_append` 输出结果，只在 rank 0 写。
-- 模型问题统一用 `include/problem.hpp`：n 为每边内部点数，h = 1/(n+1)，制造解为 sin 乘积。
+- 模型问题统一用 `include/problem.hpp`：n 为每边内部点数，h = 1/(n+1)，制造解为 Π x(1−x)eˣ（不用 sin 乘积：它是离散 Laplace 的特征向量，CG 一步就收敛，计时没有意义）。
 - 网格存储按行主序，最后一维变化最快；局部数组含一层 ghost（halo）。
+
+## 公共求解接口（A 提供，B 直接复用）
+
+CG 算法只在 `src/common/cg.cpp` 写一次，各版本只实现一个 `pcg::Backend`（`include/cg.hpp`）：
+向量分配、`apply`（stencil + halo）、`dot`/`dot2`（含全局规约）、`axpy`/`xpay`/`copy`/`zero`。
+`main()` 只需 `parse_args` → 构造 Backend → `pcg::run_solver(be, p)`，重复、计时、误差、打印和 CSV 都由它完成。
+
+- 网格布局：`include/grid.hpp` 的 `pcg::Block`（轴 0=z, 1=y, 2=x，x 连续；2D 时 z 轴不激活）。
+  串行内核 `apply_laplacian`、`local_dot`、`local_dot2`、`fill_rhs`、`local_err_sq` 都在这里。
+- 区域分解与 halo：`src/mpi/decomp.hpp`（slab/cart）、`src/mpi/halo.hpp`（阻塞 Sendrecv 或 Isend/Irecv 重叠）。
+  CMake 把 `src/mpi/` 编成库 `pcg_mpi`，`poisson_omp` / `poisson_cuda` 已自动链接它。
+- **MPI+OpenMP（B）**：继承 `pcg::MpiBackend`，重写 `stencil()`、`local_dot_hook()`、`local_dot2_hook()`、
+  `axpy()`、`xpay()`、`copy()`、`zero()` 为线程版本，并重写 `describe()` 填 `impl="omp"` 和 `threads`。
+  分解、halo、规约、计时全部沿用。
+- **MPI+CUDA（B）**：同样继承 `MpiBackend` 或直接实现 `Backend`；`alloc()` 返回 device 指针即可，驱动从不解引用向量。
+  `apply()` 需自己计时 Halo/Stencil；为使分段准确，各方法末尾 `cudaDeviceSynchronize()`。
+- 计时归属：驱动把 `dot/dot2` 记为 Reduce，向量更新记为 Stencil；`apply()` 内部自己记 Halo 与 Stencil。
 
 ## 计时约定
 
