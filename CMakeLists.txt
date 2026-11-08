@@ -135,5 +135,20 @@ if(BUILD_TESTS)
                COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np} ${_pcg_extra}
                        ${MPIEXEC_PREFLAGS} $<TARGET_FILE:test_mpi> ${MPIEXEC_POSTFLAGS})
     endforeach()
+
+    # MPI+OpenMP backend, same checks, 2 threads per rank (np 2 x 2 threads fits a 4-core laptop).
+    if(ENABLE_OPENMP AND EXISTS ${CMAKE_SOURCE_DIR}/src/hybrid_omp/omp_backend.cpp)
+      add_executable(test_omp ${CMAKE_SOURCE_DIR}/tests/test_mpi.cpp
+                              ${CMAKE_SOURCE_DIR}/src/hybrid_omp/omp_backend.cpp)
+      target_include_directories(test_omp PRIVATE ${CMAKE_SOURCE_DIR}/src/hybrid_omp)
+      target_compile_definitions(test_omp PRIVATE PCG_TEST_OMP)
+      target_link_libraries(test_omp PRIVATE pcg_mpi pcg_serial OpenMP::OpenMP_CXX)
+      foreach(np 1 2)
+        add_test(NAME omp_np${np}
+                 COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np} ${_pcg_extra}
+                         ${MPIEXEC_PREFLAGS} $<TARGET_FILE:test_omp> ${MPIEXEC_POSTFLAGS})
+        set_tests_properties(omp_np${np} PROPERTIES ENVIRONMENT OMP_NUM_THREADS=2)
+      endforeach()
+    endif()
   endif()
 endif()
