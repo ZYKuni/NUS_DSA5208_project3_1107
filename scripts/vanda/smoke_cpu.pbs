@@ -1,0 +1,36 @@
+#!/bin/bash -l
+# Submit from repository root: qsub -P YOUR_PROJECT scripts/vanda/smoke_cpu.pbs
+# Four nodes, one MPI rank and two OpenMP threads per node; not a benchmark.
+#PBS -N pcg-smoke-cpu
+#PBS -q auto
+#PBS -l select=4:ncpus=2:mpiprocs=1:ompthreads=2:mem=4gb:node_pool=cpu_node
+#PBS -l place=scatter
+#PBS -l walltime=00:10:00
+#PBS -j oe
+set -euo pipefail
+cd "${PBS_O_WORKDIR:?}"
+evidence="$PWD/results/raw/step1-cpu-${PBS_JOBID:?}"
+mkdir -p "$evidence"
+trap 'rc=$?; printf "%s\n" "$rc" > "$evidence/exit_code.txt"' EXIT
+exec > >(tee "$evidence/job.log") 2>&1
+date -u +%Y-%m-%dT%H:%M:%SZ
+qstat -f "$PBS_JOBID" > "$evidence/scheduler.txt"
+hostname
+lscpu
+cat "$PBS_NODEFILE"
+export PCG_MPI_MODULE=openmpi/gcc/64/4.1.8
+source scripts/vanda/env.sh
+module load ucx/1.10.1
+export LD_LIBRARY_PATH="/opt/pbs/lib:${LD_LIBRARY_PATH:-}"
+module list
+mpicxx --showme
+mpiexec --version
+cmake --version
+export OMP_NUM_THREADS=2 OMP_DYNAMIC=FALSE OMP_PLACES=cores OMP_PROC_BIND=close
+export PCG_BUILD_JOBS=2
+bash scripts/build.sh smoke-cpu build-smoke-cpu-pbs
+cp build-smoke-cpu-pbs/compile_commands.json "$evidence/compile_commands.json"
+sha256sum scripts/smoke/cpu.cpp build-smoke-cpu-pbs/bin/cluster_cpu_smoke > "$evidence/source_binary.sha256"
+mpiexec --mca ras tm --mca plm tm -n 4 --map-by ppr:1:node --bind-to none --report-bindings \
+  build-smoke-cpu-pbs/bin/cluster_cpu_smoke 4 2
+printf 'STEP1_CPU_COMPLETE\n'

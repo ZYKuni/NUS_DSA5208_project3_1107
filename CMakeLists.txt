@@ -8,6 +8,7 @@ option(ENABLE_MPI    "Build MPI and hybrid executables" ON)
 option(ENABLE_OPENMP "Build MPI+OpenMP executable"      ON)
 option(ENABLE_CUDA   "Build MPI+CUDA executable"        OFF)
 option(BUILD_TESTS   "Build validation tests"           ON)
+option(BUILD_CLUSTER_SMOKE "Build standalone cluster probes" OFF)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -68,14 +69,28 @@ if(ENABLE_MPI)
 
   # MPI + CUDA (owner: B). On Vanda: module load nvhpc-hpcx-cuda12/26.1
   if(ENABLE_CUDA)
-    enable_language(CUDA)
     if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-      set(CMAKE_CUDA_ARCHITECTURES 80) # A100; C to confirm Vanda GPU model
+      message(FATAL_ERROR "Set CMAKE_CUDA_ARCHITECTURES to the allocated GPU compute capability")
     endif()
+    enable_language(CUDA)
     pcg_add_app(poisson_cuda poisson_cuda.cpp hybrid_cuda)
     if(PCG_APP_ADDED)
       target_link_libraries(poisson_cuda PRIVATE MPI::MPI_CXX)
     endif()
+  endif()
+endif()
+
+# These probes exercise the toolchain independently of A/B's solver delivery.
+if(BUILD_CLUSTER_SMOKE)
+  if(NOT ENABLE_MPI OR NOT ENABLE_OPENMP)
+    message(FATAL_ERROR "Cluster probes require ENABLE_MPI and ENABLE_OPENMP")
+  endif()
+  add_executable(cluster_cpu_smoke scripts/smoke/cpu.cpp)
+  target_link_libraries(cluster_cpu_smoke PRIVATE MPI::MPI_CXX OpenMP::OpenMP_CXX)
+  if(ENABLE_CUDA)
+    add_executable(cluster_gpu_smoke scripts/smoke/gpu.cu)
+    target_link_libraries(cluster_gpu_smoke PRIVATE MPI::MPI_CXX)
+    set_target_properties(cluster_gpu_smoke PROPERTIES CUDA_STANDARD 17 CUDA_STANDARD_REQUIRED ON)
   endif()
 endif()
 
