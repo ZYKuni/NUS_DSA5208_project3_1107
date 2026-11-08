@@ -5,9 +5,18 @@
 //   - err_l2 equal to serial to 1e-6 relative,
 //   - every owned point equal to the serial solution at the same global index (max-norm).
 // Run with: mpirun -np P build/bin/test_mpi
+// The same file built with -DPCG_TEST_OMP becomes test_omp and checks the MPI+OpenMP backend.
 #include "cg.hpp"
 #include "mpi_backend.hpp"
 #include "serial_backend.hpp"
+#ifdef PCG_TEST_OMP
+#include "omp_backend.hpp"
+using ParallelBackend = pcg::OmpBackend;
+static const char* const kName = "test_omp";
+#else
+using ParallelBackend = pcg::MpiBackend;
+static const char* const kName = "test_mpi";
+#endif
 
 #include <algorithm>
 #include <cmath>
@@ -37,7 +46,7 @@ void one_case(int dim, long n, const char* decomp, const char* halo, const char*
     pcg::CGStats ss = pcg::cg_solve(sb, bs, xs, ps);
     const double es = sb.error_l2(xs);
 
-    pcg::MpiBackend mb(MPI_COMM_WORLD, p);
+    ParallelBackend mb(MPI_COMM_WORLD, p);
     double* bm = mb.alloc();
     double* xm = mb.alloc();
     mb.rhs(bm);
@@ -80,7 +89,8 @@ void one_case(int dim, long n, const char* decomp, const char* halo, const char*
 } // namespace
 
 int main(int argc, char** argv) {
-    MPI_Init(&argc, &argv);
+    int provided = 0;
+    MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &provided);
     int rank = 0, size = 1;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
