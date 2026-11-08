@@ -1,0 +1,19 @@
+{
+  "platform": "local",
+  "job_id": null,
+  "problem": "product x(1-x)exp(x); continuous manufactured RHS; zero initial guess",
+  "problem_header_sha256": "f7a64547ddd0f9fe7e0020514b3cf8edb4c0d5a5595ee59f8b4d24a0aa539860",
+  "binary_sha256": {
+    "serial": "0b76169f1f47ef8818c3ce409402b255ce25979536be747bab0d8ee7c1839937",
+    "mpi": "1a92772ee3a473cc5627a9eafe556252931ef6306fbca0aa6ebc87b0e5d3856f",
+    "omp": "620b9d314966290d2b002a235e23c49196d7bb38b716f54f43b41ac16fd45264"
+  },
+  "environment": {
+    "OMP_PLACES": null,
+    "OMP_PROC_BIND": null,
+    "OMP_WAIT_POLICY": "PASSIVE",
+    "PCG_CUDA_HALO": null
+  },
+  "repetition_policy": "independent processes, --repeat 1; keep all samples",
+  "min_solve_seconds": 1.0
+}

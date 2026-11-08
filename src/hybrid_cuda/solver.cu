@@ -124,6 +124,23 @@ Result run(const Params& p, const Domain& d, bool direct, int rank) {
     for (std::size_t i = 0; i < n; ++i)
         local += (host[i] - exact[i]) * (host[i] - exact[i]);
     MPI_Allreduce(&local, &err, 1, MPI_DOUBLE, MPI_SUM, d.comm);
+    // Recompute the true residual outside the timed solve, as the CPU driver does.
+    // Reuse the ghosted search-direction buffer for x, then apply A to it.
+    direction<<<nb, width>>>(t, n, 0, u.ptr, dir.ptr);
+    check(cudaDeviceSynchronize());
+    halo.exchange(d, dir.ptr);
+    stencil<<<nb, width>>>(t, p.dim, n, 1 / (h * h), dir.ptr, ap.ptr);
+    check(cudaMemcpy(host.data(), ap.ptr, n * sizeof(double), cudaMemcpyDeviceToHost));
+    local = 0;
+    for (std::size_t i = 0; i < n; ++i) {
+        const double x = (d.origin[2] + i % t.nx + 1) * h;
+        const double y = (d.origin[1] + i / t.nx % t.ny + 1) * h;
+        const double z = (d.origin[0] + i / t.nx / t.ny + 1) * h;
+        const double residual = rhs_f(p.dim, x, y, z) - host[i];
+        local += residual * residual;
+    }
+    double residual_sq;
+    MPI_Allreduce(&local, &residual_sq, 1, MPI_DOUBLE, MPI_SUM, d.comm);
     MPI_Comm_size(d.comm, &row.ranks);
     row.gpus = row.ranks;
     row.impl = "cuda";
@@ -136,7 +153,7 @@ Result run(const Params& p, const Domain& d, bool direct, int rank) {
     row.t_stencil = maxima[1];
     row.t_halo = maxima[2];
     row.t_reduce = maxima[3];
-    row.rel_res = std::sqrt(rho / initial);
+    row.rel_res = std::sqrt(residual_sq / initial);
     row.err_l2 = std::sqrt(err * std::pow(h, p.dim));
     return row;
 }

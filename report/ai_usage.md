@@ -35,3 +35,10 @@ For each entry: date, tool, what it was used for, which files or text came from 
   exit status zero and the expected arithmetic checks. Earlier failed/cancelled
   attempts were retained. These probes do not validate the Poisson solvers or
   establish scaling performance. Human review remains required.
+
+- 2026-11-08, OpenAI Codex: reviewed every remote branch, integrated A's latest
+  serial/MPI/OpenMP work into c/bench, added the workload checker and PBS pilots,
+  and added CUDA true-residual validation. The non-eigenmode manufactured problem
+  was supplied by A's upstream change. Checks include the existing seven CTest
+  groups, independent repeated serial/parallel comparisons, and Vanda jobs; exact
+  accepted results and limitations are recorded in report/workload_step2.md.
