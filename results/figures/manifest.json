@@ -1,0 +1,380 @@
+{
+  "figures": [
+    {
+      "name": "serial_scaling",
+      "title": "Serial scaling: runtime and iteration count",
+      "caption": "Line/filled marker: minimum; hollow diamond: median; shading: observed min-max (3 runs, not a CI).\nAll serial sweep meshes retained, including the unused n=202 reference.",
+      "groups": [
+        "serial-serial-2d-n1024-p1-t1-cart-block-std",
+        "serial-serial-2d-n128-p1-t1-cart-block-std",
+        "serial-serial-2d-n2048-p1-t1-cart-block-std",
+        "serial-serial-2d-n256-p1-t1-cart-block-std",
+        "serial-serial-2d-n512-p1-t1-cart-block-std",
+        "serial-serial-3d-n128-p1-t1-cart-block-std",
+        "serial-serial-3d-n192-p1-t1-cart-block-std",
+        "serial-serial-3d-n202-p1-t1-cart-block-std",
+        "serial-serial-3d-n288-p1-t1-cart-block-std",
+        "serial-serial-3d-n32-p1-t1-cart-block-std",
+        "serial-serial-3d-n64-p1-t1-cart-block-std"
+      ],
+      "pdf_sha256": "054d4ec6f7182ebb44fad442f18e6415098910c39a09165b5ca8e20144dd68c9",
+      "png_sha256": "584d8e6525a4bb838cba86bd4410a2389e487c85288fbb80663c2de3538701ae"
+    },
+    {
+      "name": "serial_error",
+      "title": "Validation: serial discretization error",
+      "caption": "Dashed lines show h^2 trends anchored at each dimension's coarsest mesh; they are not fitted models.\nEvery retained parallel sample also passes the same-mesh serial iteration/error check and true residual < 1e-8.",
+      "groups": [
+        "serial-serial-2d-n1024-p1-t1-cart-block-std",
+        "serial-serial-2d-n128-p1-t1-cart-block-std",
+        "serial-serial-2d-n2048-p1-t1-cart-block-std",
+        "serial-serial-2d-n256-p1-t1-cart-block-std",
+        "serial-serial-2d-n512-p1-t1-cart-block-std",
+        "serial-serial-3d-n128-p1-t1-cart-block-std",
+        "serial-serial-3d-n192-p1-t1-cart-block-std",
+        "serial-serial-3d-n202-p1-t1-cart-block-std",
+        "serial-serial-3d-n288-p1-t1-cart-block-std",
+        "serial-serial-3d-n32-p1-t1-cart-block-std",
+        "serial-serial-3d-n64-p1-t1-cart-block-std"
+      ],
+      "pdf_sha256": "17b2ca9c7a94d10881632d1d2c0ca25d77b2b63d172fe059b1016333a395ab09",
+      "png_sha256": "3d26fb436da3fbba03551c6611bd42198745562fa6b2416647eed64e592905e9"
+    },
+    {
+      "name": "strong_2d_n2048",
+      "title": "2D strong scaling | n=2048 | through 288 physical cores",
+      "caption": "Line/filled marker: minimum; hollow diamond: median; shading: observed min-max (3 runs, not a CI).\nEach decomposition uses its own one-rank MPI baseline; ratio shading is an all-pairs range envelope.",
+      "groups": [
+        "strong-mpi-2d-n2048-p1-t1-cart-block-std",
+        "strong-mpi-2d-n2048-p1-t1-slab-block-std",
+        "strong-mpi-2d-n2048-p128-t1-cart-block-std",
+        "strong-mpi-2d-n2048-p128-t1-slab-block-std",
+        "strong-mpi-2d-n2048-p16-t1-cart-block-std",
+        "strong-mpi-2d-n2048-p16-t1-slab-block-std",
+        "strong-mpi-2d-n2048-p2-t1-cart-block-std",
+        "strong-mpi-2d-n2048-p2-t1-slab-block-std",
+        "strong-mpi-2d-n2048-p256-t1-cart-block-std",
+        "strong-mpi-2d-n2048-p256-t1-slab-block-std",
+        "strong-mpi-2d-n2048-p288-t1-cart-block-std",
+        "strong-mpi-2d-n2048-p288-t1-slab-block-std",
+        "strong-mpi-2d-n2048-p32-t1-cart-block-std",
+        "strong-mpi-2d-n2048-p32-t1-slab-block-std",
+        "strong-mpi-2d-n2048-p4-t1-cart-block-std",
+        "strong-mpi-2d-n2048-p4-t1-slab-block-std",
+        "strong-mpi-2d-n2048-p64-t1-cart-block-std",
+        "strong-mpi-2d-n2048-p64-t1-slab-block-std",
+        "strong-mpi-2d-n2048-p8-t1-cart-block-std",
+        "strong-mpi-2d-n2048-p8-t1-slab-block-std"
+      ],
+      "pdf_sha256": "14ac20626629fc4c51e9160d3a1745ffe1f4f0f7224994780d6626a5cf0bf74e",
+      "png_sha256": "cbd9e07e1c29ca660b0bc25d2d0798502c53585604d3e45052769b838a3a2973"
+    },
+    {
+      "name": "phases_2d_n2048",
+      "title": "2D phase timing | n=2048 | independent rank maxima",
+      "caption": "Line: phase from the fastest whole solve; hollow: phase median; shading: observed phase range.\nPhase maxima may occur on different ranks and intervals may overlap. Do not stack or interpret their sum as total.",
+      "groups": [
+        "strong-mpi-2d-n2048-p1-t1-cart-block-std",
+        "strong-mpi-2d-n2048-p1-t1-slab-block-std",
+        "strong-mpi-2d-n2048-p128-t1-cart-block-std",
+        "strong-mpi-2d-n2048-p128-t1-slab-block-std",
+        "strong-mpi-2d-n2048-p16-t1-cart-block-std",
+        "strong-mpi-2d-n2048-p16-t1-slab-block-std",
+        "strong-mpi-2d-n2048-p2-t1-cart-block-std",
+        "strong-mpi-2d-n2048-p2-t1-slab-block-std",
+        "strong-mpi-2d-n2048-p256-t1-cart-block-std",
+        "strong-mpi-2d-n2048-p256-t1-slab-block-std",
+        "strong-mpi-2d-n2048-p288-t1-cart-block-std",
+        "strong-mpi-2d-n2048-p288-t1-slab-block-std",
+        "strong-mpi-2d-n2048-p32-t1-cart-block-std",
+        "strong-mpi-2d-n2048-p32-t1-slab-block-std",
+        "strong-mpi-2d-n2048-p4-t1-cart-block-std",
+        "strong-mpi-2d-n2048-p4-t1-slab-block-std",
+        "strong-mpi-2d-n2048-p64-t1-cart-block-std",
+        "strong-mpi-2d-n2048-p64-t1-slab-block-std",
+        "strong-mpi-2d-n2048-p8-t1-cart-block-std",
+        "strong-mpi-2d-n2048-p8-t1-slab-block-std"
+      ],
+      "pdf_sha256": "159f19a862c1040597ceca4f75441f37571dda075f416bb737d5fc23ad0df79b",
+      "png_sha256": "efcef48faba1640d9c4994fe12bb338535ba6ffca7572b75d2f60f0036ea0f06"
+    },
+    {
+      "name": "strong_3d_n288",
+      "title": "3D strong scaling | n=288 | through 288 physical cores",
+      "caption": "Line/filled marker: minimum; hollow diamond: median; shading: observed min-max (3 runs, not a CI).\nEach decomposition uses its own one-rank MPI baseline; ratio shading is an all-pairs range envelope.",
+      "groups": [
+        "strong-mpi-3d-n288-p1-t1-cart-block-std",
+        "strong-mpi-3d-n288-p1-t1-slab-block-std",
+        "strong-mpi-3d-n288-p128-t1-cart-block-std",
+        "strong-mpi-3d-n288-p128-t1-slab-block-std",
+        "strong-mpi-3d-n288-p16-t1-cart-block-std",
+        "strong-mpi-3d-n288-p16-t1-slab-block-std",
+        "strong-mpi-3d-n288-p2-t1-cart-block-std",
+        "strong-mpi-3d-n288-p2-t1-slab-block-std",
+        "strong-mpi-3d-n288-p256-t1-cart-block-std",
+        "strong-mpi-3d-n288-p256-t1-slab-block-std",
+        "strong-mpi-3d-n288-p288-t1-cart-block-std",
+        "strong-mpi-3d-n288-p288-t1-slab-block-std",
+        "strong-mpi-3d-n288-p32-t1-cart-block-std",
+        "strong-mpi-3d-n288-p32-t1-slab-block-std",
+        "strong-mpi-3d-n288-p4-t1-cart-block-std",
+        "strong-mpi-3d-n288-p4-t1-slab-block-std",
+        "strong-mpi-3d-n288-p64-t1-cart-block-std",
+        "strong-mpi-3d-n288-p64-t1-slab-block-std",
+        "strong-mpi-3d-n288-p8-t1-cart-block-std",
+        "strong-mpi-3d-n288-p8-t1-slab-block-std"
+      ],
+      "pdf_sha256": "c139eee0948369a762c51c08593115244e96db1e037cf994eec5b11b2902e0fe",
+      "png_sha256": "330e162621999935391f81aaac47e8c6ae47f0031e46631de59d1f7d78142094"
+    },
+    {
+      "name": "phases_3d_n288",
+      "title": "3D phase timing | n=288 | independent rank maxima",
+      "caption": "Line: phase from the fastest whole solve; hollow: phase median; shading: observed phase range.\nPhase maxima may occur on different ranks and intervals may overlap. Do not stack or interpret their sum as total.",
+      "groups": [
+        "strong-mpi-3d-n288-p1-t1-cart-block-std",
+        "strong-mpi-3d-n288-p1-t1-slab-block-std",
+        "strong-mpi-3d-n288-p128-t1-cart-block-std",
+        "strong-mpi-3d-n288-p128-t1-slab-block-std",
+        "strong-mpi-3d-n288-p16-t1-cart-block-std",
+        "strong-mpi-3d-n288-p16-t1-slab-block-std",
+        "strong-mpi-3d-n288-p2-t1-cart-block-std",
+        "strong-mpi-3d-n288-p2-t1-slab-block-std",
+        "strong-mpi-3d-n288-p256-t1-cart-block-std",
+        "strong-mpi-3d-n288-p256-t1-slab-block-std",
+        "strong-mpi-3d-n288-p288-t1-cart-block-std",
+        "strong-mpi-3d-n288-p288-t1-slab-block-std",
+        "strong-mpi-3d-n288-p32-t1-cart-block-std",
+        "strong-mpi-3d-n288-p32-t1-slab-block-std",
+        "strong-mpi-3d-n288-p4-t1-cart-block-std",
+        "strong-mpi-3d-n288-p4-t1-slab-block-std",
+        "strong-mpi-3d-n288-p64-t1-cart-block-std",
+        "strong-mpi-3d-n288-p64-t1-slab-block-std",
+        "strong-mpi-3d-n288-p8-t1-cart-block-std",
+        "strong-mpi-3d-n288-p8-t1-slab-block-std"
+      ],
+      "pdf_sha256": "1446465b799cef7e76719e79cce062883c4a036c0d971b13ef1210e043f9688a",
+      "png_sha256": "f2ad45f078e831a63e4abc6ea52048f90ec42ccdc4639bf8b9ab3bf9fbc9e857"
+    },
+    {
+      "name": "weak_2d",
+      "title": "2D weak scaling | through 256 physical cores",
+      "caption": "Line/filled marker: minimum; hollow diamond: median; shading: observed min-max (3 runs, not a CI).\n2D owned points/core are exactly constant at 16384 through 256 cores.\nWhole-solve time includes iteration growth; per-iteration ratios isolate average iteration cost.",
+      "groups": [
+        "weak-mpi-2d-n1024-p64-t1-cart-block-std",
+        "weak-mpi-2d-n128-p1-t1-cart-block-std",
+        "weak-mpi-2d-n2048-p256-t1-cart-block-std",
+        "weak-mpi-2d-n256-p4-t1-cart-block-std",
+        "weak-mpi-2d-n512-p16-t1-cart-block-std"
+      ],
+      "pdf_sha256": "b8401d2c6cfe461f5281f754295e1781ddf661ffaf034874cbc120da9c7b2bb1",
+      "png_sha256": "d8ed75118ae67fba7665990ca5e5d64a7511e246225e810e1d4057d70728add0"
+    },
+    {
+      "name": "weak_3d",
+      "title": "3D weak scaling | incomplete endpoint",
+      "caption": "Line/filled marker: minimum; hollow diamond: median; shading: observed min-max (3 runs, not a CI).\n3D curve ends at 216 cores; the planned 256-core point is absent and is not interpolated.\nWhole-solve time includes iteration growth; per-iteration ratios isolate average iteration cost.",
+      "groups": [
+        "weak-mpi-3d-n128-p64-t1-cart-block-std",
+        "weak-mpi-3d-n192-p216-t1-cart-block-std",
+        "weak-mpi-3d-n32-p1-t1-cart-block-std",
+        "weak-mpi-3d-n64-p8-t1-cart-block-std"
+      ],
+      "pdf_sha256": "99e8649ab11027325b31f35f9258ebeb7ac24944b46214369a2298fb32c2de9a",
+      "png_sha256": "a261bdb5bd8377257632caaac8ea41bd682e11075ab2a3d5cec050a548ae38b0"
+    },
+    {
+      "name": "variants_2d_n2048",
+      "title": "2D parallelization choices | n=2048 | Cartesian decomposition",
+      "caption": "Whole solve: minimum/median/range of 3 runs. Phase line: same row as minimum solve; hollow: phase median.\n'pipe' is single-reduction CG (Chronopoulos-Gear); it is not a claim of asynchronous pipelined CG.",
+      "groups": [
+        "strong-mpi-2d-n2048-p256-t1-cart-block-std",
+        "strong-mpi-2d-n2048-p64-t1-cart-block-std",
+        "variants-mpi-2d-n2048-p256-t1-cart-block-pipe",
+        "variants-mpi-2d-n2048-p256-t1-cart-overlap-pipe",
+        "variants-mpi-2d-n2048-p256-t1-cart-overlap-std",
+        "variants-mpi-2d-n2048-p64-t1-cart-block-pipe",
+        "variants-mpi-2d-n2048-p64-t1-cart-overlap-pipe",
+        "variants-mpi-2d-n2048-p64-t1-cart-overlap-std"
+      ],
+      "pdf_sha256": "951eb1096b03e20222f53ad09ddbfe9805146675d4fde7b4f17f7f46ef91ca7b",
+      "png_sha256": "ab814bd466c9338e2984677dbda7129fcee82cb2891b1227a428b932d46f58f1"
+    },
+    {
+      "name": "variants_3d_n288",
+      "title": "3D parallelization choices | n=288 | Cartesian decomposition",
+      "caption": "Whole solve: minimum/median/range of 3 runs. Phase line: same row as minimum solve; hollow: phase median.\n'pipe' is single-reduction CG (Chronopoulos-Gear); it is not a claim of asynchronous pipelined CG.",
+      "groups": [
+        "strong-mpi-3d-n288-p256-t1-cart-block-std",
+        "strong-mpi-3d-n288-p64-t1-cart-block-std",
+        "variants-mpi-3d-n288-p256-t1-cart-block-pipe",
+        "variants-mpi-3d-n288-p256-t1-cart-overlap-pipe",
+        "variants-mpi-3d-n288-p256-t1-cart-overlap-std",
+        "variants-mpi-3d-n288-p64-t1-cart-block-pipe",
+        "variants-mpi-3d-n288-p64-t1-cart-overlap-pipe",
+        "variants-mpi-3d-n288-p64-t1-cart-overlap-std"
+      ],
+      "pdf_sha256": "1013af72dd5fcc966060a7b6b586f9bcbe2708577fbeac31b9a3350338c5debd",
+      "png_sha256": "7c550ee8fa826ecbd53907d3e917ee7f42f05c6691c7a6f940647b39ef85c749"
+    },
+    {
+      "name": "hybrid_2d_n2048",
+      "title": "2D MPI + OpenMP | n=2048 | fixed 288 physical cores",
+      "caption": "Line/filled marker: minimum; hollow diamond: median; shading: observed min-max (3 runs, not a CI).\nMPI ranks x threads: 288x1, 144x2, 72x4, 32x9, 16x18, 4x72. Ratio is not a strong-scaling efficiency.",
+      "groups": [
+        "hybrid-omp-2d-n2048-p144-t2-cart-block-std",
+        "hybrid-omp-2d-n2048-p16-t18-cart-block-std",
+        "hybrid-omp-2d-n2048-p288-t1-cart-block-std",
+        "hybrid-omp-2d-n2048-p32-t9-cart-block-std",
+        "hybrid-omp-2d-n2048-p4-t72-cart-block-std",
+        "hybrid-omp-2d-n2048-p72-t4-cart-block-std"
+      ],
+      "pdf_sha256": "30407aade128364ea2e0ae94cdaf13f4ae2b2e89ed4c14fa2853c393912c0af3",
+      "png_sha256": "9a5d70984d01a93e07bfff11d8ab8879b9acfbed35206e6d43125b43a64bbf83"
+    },
+    {
+      "name": "hybrid_3d_n288",
+      "title": "3D MPI + OpenMP | n=288 | fixed 288 physical cores",
+      "caption": "Line/filled marker: minimum; hollow diamond: median; shading: observed min-max (3 runs, not a CI).\nMPI ranks x threads: 288x1, 144x2, 72x4, 32x9, 16x18, 4x72. Ratio is not a strong-scaling efficiency.",
+      "groups": [
+        "hybrid-omp-3d-n288-p144-t2-cart-block-std",
+        "hybrid-omp-3d-n288-p16-t18-cart-block-std",
+        "hybrid-omp-3d-n288-p288-t1-cart-block-std",
+        "hybrid-omp-3d-n288-p32-t9-cart-block-std",
+        "hybrid-omp-3d-n288-p4-t72-cart-block-std",
+        "hybrid-omp-3d-n288-p72-t4-cart-block-std"
+      ],
+      "pdf_sha256": "0bd49e08b704a44ab6d1503f60605297515949fd40dbdb95828d815e2e32b0d1",
+      "png_sha256": "83b7959bdf18b589c0b0dbec8cb6fae346fa356b510445a0e20083a0fba5d7b0"
+    }
+  ],
+  "count": 12,
+  "book_sha256": "f5771d2eca09c0762a4b05905c0a061bd8da67f58420fe5ea963cb04735ab237",
+  "all_csv_sha256": "b7c77199aef32fac16049d84427d89b4f2b01584c43505f4db590ed93d8cd024",
+  "analysis_manifest_sha256": "cf02d14d5df386ac39a12b603e5f24ffce00bea485a84202b17d0be4c691ef23",
+  "plotter_sha256": "3fa7075c049f5a5aa4d09816fd1944d0989e1a440a03fca0da011a20c1fc67bc",
+  "coverage": {
+    "cpu_series": [
+      {
+        "experiment": "strong",
+        "dim": 2,
+        "decomp": "cart",
+        "observed_ranks": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          64,
+          128,
+          256,
+          288
+        ],
+        "missing_ranks": [],
+        "complete": true
+      },
+      {
+        "experiment": "strong",
+        "dim": 2,
+        "decomp": "slab",
+        "observed_ranks": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          64,
+          128,
+          256,
+          288
+        ],
+        "missing_ranks": [],
+        "complete": true
+      },
+      {
+        "experiment": "weak",
+        "dim": 2,
+        "decomp": "cart",
+        "observed_ranks": [
+          1,
+          4,
+          16,
+          64,
+          256
+        ],
+        "missing_ranks": [],
+        "complete": true
+      },
+      {
+        "experiment": "strong",
+        "dim": 3,
+        "decomp": "cart",
+        "observed_ranks": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          64,
+          128,
+          256,
+          288
+        ],
+        "missing_ranks": [],
+        "complete": true
+      },
+      {
+        "experiment": "strong",
+        "dim": 3,
+        "decomp": "slab",
+        "observed_ranks": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          64,
+          128,
+          256,
+          288
+        ],
+        "missing_ranks": [],
+        "complete": true
+      },
+      {
+        "experiment": "weak",
+        "dim": 3,
+        "decomp": "cart",
+        "observed_ranks": [
+          1,
+          8,
+          64,
+          216
+        ],
+        "missing_ranks": [
+          256
+        ],
+        "complete": false
+      }
+    ],
+    "accepted_gpu_groups": 0,
+    "gpu_status": "unavailable",
+    "task3_complete": false
+  },
+  "versions": {
+    "python": "3.12.11",
+    "matplotlib": "3.11.1",
+    "pandas": "3.0.5",
+    "numpy": "2.5.3"
+  },
+  "skipped": [
+    {
+      "figure": "gpu_scaling",
+      "reason": "No accepted GPU measurements"
+    }
+  ]
+}

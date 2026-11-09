@@ -59,3 +59,15 @@ For each entry: date, tool, what it was used for, which files or text came from 
   `report/scaling_step3.md` and the accepted-data provenance. PBS refused
   submissions on this date; neither the supplement nor the GPU fix has been
   validated on the cluster, and task 3 remains incomplete.
+
+- 2026-11-09, OpenAI Codex: completed task 4's CPU collector and plotting
+  scripts, explicit audited-input selection, matched strong/weak/variant/hybrid
+  baselines, repeat statistics, checksum manifests, report tables, 12 figures
+  and the CPU results discussion. Excluded eight preflight groups without
+  removing measured outliers; retained 84 groups / 252 samples and the missing
+  3D weak/GPU status. Added 12 regression tests covering incorrect baselines,
+  altered exports, missing repeats and failed convergence; all passed.
+  Independently checked output metrics against the accepted CSVs and rendered
+  every page of the exported PDF book for visual inspection. The text and
+  figures describe observations and limitations; they do not invent missing
+  GPU results or claim unmeasured causes of performance changes.

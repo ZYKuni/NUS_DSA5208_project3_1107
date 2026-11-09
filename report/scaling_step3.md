@@ -104,4 +104,5 @@ Vanda, outside Git. Reproduction and the exact supplement commands are in
 [`scripts/vanda/STEP3.md`](../scripts/vanda/STEP3.md#current-dataset-and-recovery).
 After PBS recovers, submit the CPU supplement and GPU suite, archive their
 final scheduler records, and audit both before claiming task 3 complete.
-Collector changes and figures remain task 4.
+Task 4's collector and CPU figures are now available in
+[`analysis_step4.md`](analysis_step4.md), with these measurement gaps retained.

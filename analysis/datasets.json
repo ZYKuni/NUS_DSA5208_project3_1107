@@ -1,0 +1,20 @@
+{
+  "dataset": "vanda-step3-audited-cpu",
+  "inputs": [
+    {
+      "prefix": "benchmarks/step3/cpu_main",
+      "allow_documented_partial": true,
+      "exclude_groups": [],
+      "sha256": {
+        "samples.csv": "45f5619822183f9c46f2001d289265378d3f8434e649a42d236a735fecb3edd2",
+        "summary.csv": "72c1f085f92dded1efb3fd82e71cd304174b7ffe0459b93d8b4980b9c45b855b",
+        "manifest.json": "52682f426c39bf77e17740ff7ff44cba0caa424ba28c69f25fe95c41258ebfe4",
+        "audit.json": "3a8bcd35849b8b3eb1c25a3c2d02c0d824c26c5a012a805db213032ba29f05ab"
+      }
+    }
+  ],
+  "exclude_experiments": [
+    "preflight",
+    "pilot"
+  ]
+}

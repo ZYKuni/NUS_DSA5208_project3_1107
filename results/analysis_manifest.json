@@ -1,0 +1,221 @@
+{
+  "dataset": "vanda-step3-audited-cpu",
+  "config_sha256": "3244a7bc9c8e4f63b26c0e4366ad9d9a3ab9530df9e9865ad9ef56d43ee370dd",
+  "collector_sha256": "978dba8d9f12b54e7cefd3242085138b62707490ceffec7c793ff1109994f5d3",
+  "inputs": [
+    {
+      "prefix": "benchmarks/step3/cpu_main",
+      "sha256": {
+        "samples.csv": "45f5619822183f9c46f2001d289265378d3f8434e649a42d236a735fecb3edd2",
+        "summary.csv": "72c1f085f92dded1efb3fd82e71cd304174b7ffe0459b93d8b4980b9c45b855b",
+        "manifest.json": "52682f426c39bf77e17740ff7ff44cba0caa424ba28c69f25fe95c41258ebfe4",
+        "audit.json": "3a8bcd35849b8b3eb1c25a3c2d02c0d824c26c5a012a805db213032ba29f05ab"
+      },
+      "audit": {
+        "job_id": "1533443.stdct-mgmt-02",
+        "exit_status": 1,
+        "groups": 92,
+        "samples": 276,
+        "scope": "completed groups only",
+        "documented_missing_reference_failure": true,
+        "source_hashes_match": true,
+        "placement_verified": true,
+        "serial_comparisons_pass": true,
+        "max_true_rel_res": 5.597143e-09,
+        "exec_host": "CN-013/0*0+CN-083/0*0+CN-132/0*0+CN-138/0*0",
+        "allocation": "4:ncpus=72:mpiprocs=72:ompthreads=1:mem=500GB:node_pool=cpu_node",
+        "sample_sha256": "45f5619822183f9c46f2001d289265378d3f8434e649a42d236a735fecb3edd2"
+      }
+    }
+  ],
+  "groups": 84,
+  "samples": 252,
+  "excluded_groups": [
+    {
+      "job_id": "1533443.stdct-mgmt-02",
+      "group": "preflight-mpi-2d-n31-p256-t1-cart-block-std",
+      "reason": "preflight"
+    },
+    {
+      "job_id": "1533443.stdct-mgmt-02",
+      "group": "preflight-mpi-2d-n31-p288-t1-cart-block-std",
+      "reason": "preflight"
+    },
+    {
+      "job_id": "1533443.stdct-mgmt-02",
+      "group": "preflight-mpi-3d-n15-p256-t1-cart-block-std",
+      "reason": "preflight"
+    },
+    {
+      "job_id": "1533443.stdct-mgmt-02",
+      "group": "preflight-mpi-3d-n15-p288-t1-cart-block-std",
+      "reason": "preflight"
+    },
+    {
+      "job_id": "1533443.stdct-mgmt-02",
+      "group": "preflight-omp-2d-n31-p32-t9-cart-block-std",
+      "reason": "preflight"
+    },
+    {
+      "job_id": "1533443.stdct-mgmt-02",
+      "group": "preflight-omp-3d-n15-p32-t9-cart-block-std",
+      "reason": "preflight"
+    },
+    {
+      "job_id": "1533443.stdct-mgmt-02",
+      "group": "preflight-serial-2d-n31-p1-t1-cart-block-std",
+      "reason": "preflight"
+    },
+    {
+      "job_id": "1533443.stdct-mgmt-02",
+      "group": "preflight-serial-3d-n15-p1-t1-cart-block-std",
+      "reason": "preflight"
+    }
+  ],
+  "counts": {
+    "strong": 40,
+    "hybrid": 12,
+    "variants": 12,
+    "serial": 11,
+    "weak": 9
+  },
+  "coverage": {
+    "cpu_series": [
+      {
+        "experiment": "strong",
+        "dim": 2,
+        "decomp": "cart",
+        "observed_ranks": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          64,
+          128,
+          256,
+          288
+        ],
+        "missing_ranks": [],
+        "complete": true
+      },
+      {
+        "experiment": "strong",
+        "dim": 2,
+        "decomp": "slab",
+        "observed_ranks": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          64,
+          128,
+          256,
+          288
+        ],
+        "missing_ranks": [],
+        "complete": true
+      },
+      {
+        "experiment": "weak",
+        "dim": 2,
+        "decomp": "cart",
+        "observed_ranks": [
+          1,
+          4,
+          16,
+          64,
+          256
+        ],
+        "missing_ranks": [],
+        "complete": true
+      },
+      {
+        "experiment": "strong",
+        "dim": 3,
+        "decomp": "cart",
+        "observed_ranks": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          64,
+          128,
+          256,
+          288
+        ],
+        "missing_ranks": [],
+        "complete": true
+      },
+      {
+        "experiment": "strong",
+        "dim": 3,
+        "decomp": "slab",
+        "observed_ranks": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          64,
+          128,
+          256,
+          288
+        ],
+        "missing_ranks": [],
+        "complete": true
+      },
+      {
+        "experiment": "weak",
+        "dim": 3,
+        "decomp": "cart",
+        "observed_ranks": [
+          1,
+          8,
+          64,
+          216
+        ],
+        "missing_ranks": [
+          256
+        ],
+        "complete": false
+      }
+    ],
+    "accepted_gpu_groups": 0,
+    "gpu_status": "unavailable",
+    "task3_complete": false
+  },
+  "output_sha256": {
+    "all.csv": "b7c77199aef32fac16049d84427d89b4f2b01584c43505f4db590ed93d8cd024",
+    "analysis_samples.csv": "504dee6b396f5cb39b8cb9dc4ff270a546a2aeda793c18aae7ebb1e9929313fa",
+    "hybrid_omp_2d.csv": "0863fbb7cd17e5383463594a6cef208ae718d1e71fd0f61dafc7a203a65fb4c0",
+    "hybrid_omp_3d.csv": "a933c124b50a8b536e37b10d1576e438a81c651173b19203e63c613daa7a9869",
+    "serial_serial_2d.csv": "c33626d9efe54836e2fddf9022fee6563b8c8ae8418c8d365c96f13bb48f202c",
+    "serial_serial_3d.csv": "db81bc2d839d419b43915577f511e83591e6d0e5b454233e15a0c2200800033d",
+    "strong_mpi_2d.csv": "e32b3a56f04ddc50a007c7978b4fce4a9060da1da7bc049206ea0cce77ceb1c1",
+    "strong_mpi_3d.csv": "d1b46065796a18b60095fc9d6d4bfb152307b450c66f44af8b24a169314646e2",
+    "variants_mpi_2d.csv": "5deb57e986571c39472c9be42bc1575867897f82e9241d0995ba95e3ad4f347f",
+    "variants_mpi_3d.csv": "565b3e86b3911b40c8a99efde52f66144313fc3944619f9690bbfde35b878ab7",
+    "weak_mpi_2d.csv": "20418c12adb59c93e9c0833e161ffe6c9aea03fefcaea84a242406277323e8a6",
+    "weak_mpi_3d.csv": "fd3321dd109e0f4132679b832eac673a88e4badd5bee4b146c55371eda3b6f9e",
+    "tables/strong_endpoints.csv": "0cc58519a43de3f64e7c922ecb860e6d8be9c95b7b1efff93fb69bde72bbe7c5",
+    "tables/weak_scaling.csv": "2be039dff863a2a94f5fed2f5863d0cf4c14798ed186797d6f4f8727719effbd",
+    "tables/hybrid_comparison.csv": "ab44a50f5b9ba61680db32d720a035ad835018721b23aafe82aab38f718ec9f7",
+    "tables/variant_comparison.csv": "db663ce5576d0fd4386705fd911ae3cce463d6c27420cea274b26b6916ddfbb7",
+    "tables/serial_scaling.csv": "5cb7e089e5d194ce6a6f9bfc77d156901d6c678177a3fc33556261c725663f9c"
+  },
+  "versions": {
+    "python": "3.12.11",
+    "pandas": "3.0.5",
+    "numpy": "2.5.3"
+  },
+  "selection": "minimum complete row of three repeats; median and range retained",
+  "ratio_range": "all-pairs envelope of observed sample ranges; not a confidence interval",
+  "phases": "independently maximised rank times; not additive or a communication fraction"
+}

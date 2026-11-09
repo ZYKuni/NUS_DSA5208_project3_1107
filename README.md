@@ -127,10 +127,24 @@ qsub -P YOUR_PROJECT scripts/vanda/scaling_gpu.pbs # serial checks, 1/2 GPUs, st
 
 See [the task 3 run guide](scripts/vanda/STEP3.md) for exact meshes, timing,
 placement, queue limits and evidence requirements. The original individual PBS
-files are uncalibrated templates. The existing collector/plotting scripts need
-the task 4 update before ingesting the new labelled samples.
+files are uncalibrated templates.
 The [task 3 status](report/scaling_step3.md) records the validated 288-core CPU
 results and the outstanding 3D weak/GPU runs; the suite is not yet complete.
+
+Reproduce the task 4 analysis from the committed audited CPU exports:
+
+```bash
+python3 -m pip install -r analysis/requirements-reproduce.txt
+python3 analysis/collect.py
+python3 analysis/plots.py
+```
+
+The [analysis guide](analysis/README.md) defines the baselines and explicit
+data selection. Outputs include 84 performance groups / 252 samples,
+[report tables](results/tables/README.md), [12 figures and a PDF book](results/figures/README.md),
+and [the results discussion](report/analysis_step4.md). The missing 3D weak
+endpoint and unavailable GPU measurements remain marked; no raw log is needed
+to reproduce these CPU artifacts.
 
 ## Validation
 
