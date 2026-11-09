@@ -42,3 +42,20 @@ For each entry: date, tool, what it was used for, which files or text came from 
   was supplied by A's upstream change. Checks include the existing seven CTest
   groups, independent repeated serial/parallel comparisons, and Vanda jobs; exact
   accepted results and limitations are recorded in report/workload_step2.md.
+
+- 2026-11-08, OpenAI Codex: prepared task 3's CPU/GPU experiment drivers,
+  physical-core pinning and evidence audit; moved the shared CPU timer inside
+  CG to exclude setup; corrected the CUDA-only probe's MPI wrapper link; and
+  added a regression check for the PBS remote-launch command protocol. The local
+  seven-group CTest run and launcher regression passed. Cluster completion and
+  accepted measurement counts must be taken from the audited task 3 evidence;
+  submitted, failed and cancelled attempts are not accepted results.
+
+- 2026-11-09, OpenAI Codex: audited the 92 completed CPU groups (276 samples),
+  documented the actual nonzero job exit, corrected the missing n=203 serial
+  reference, prepared a complete 3D weak-curve supplement, and added explicit
+  GPU environment exports after inspecting the failed smoke test. Added two
+  weak-mesh regression tests; all three script tests passed. Drafted
+  `report/scaling_step3.md` and the accepted-data provenance. PBS refused
+  submissions on this date; neither the supplement nor the GPU fix has been
+  validated on the cluster, and task 3 remains incomplete.

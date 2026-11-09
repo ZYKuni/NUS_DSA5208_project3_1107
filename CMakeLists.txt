@@ -106,6 +106,9 @@ if(BUILD_CLUSTER_SMOKE)
     add_executable(cluster_gpu_smoke scripts/smoke/gpu.cu)
     target_link_libraries(cluster_gpu_smoke PRIVATE MPI::MPI_CXX)
     set_target_properties(cluster_gpu_smoke PROPERTIES CUDA_STANDARD 17 CUDA_STANDARD_REQUIRED ON)
+    # FindMPI may treat mpicxx's MPI libraries as implicit. Use that wrapper for
+    # the final link even though this probe contains only a CUDA source file.
+    set_target_properties(cluster_gpu_smoke PROPERTIES LINKER_LANGUAGE CXX)
   endif()
 endif()
 

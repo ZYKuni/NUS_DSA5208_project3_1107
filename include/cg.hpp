@@ -71,6 +71,7 @@ struct CGStats {
     int iters = 0;      // number of CG updates of x
     double rel_res = 0; // recursive ||r|| / ||b|| when the loop stopped
     bool converged = false;
+    double solve_seconds = 0; // max-rank loop time, excluding allocation and initialisation
 };
 
 // Solves A x = b starting from x = 0 with standard CG (variant "std", two reductions per

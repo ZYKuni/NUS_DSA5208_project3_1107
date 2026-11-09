@@ -1,0 +1,15 @@
+{
+  "job_id": "1533443.stdct-mgmt-02",
+  "exit_status": 1,
+  "groups": 92,
+  "samples": 276,
+  "scope": "completed groups only",
+  "documented_missing_reference_failure": true,
+  "source_hashes_match": true,
+  "placement_verified": true,
+  "serial_comparisons_pass": true,
+  "max_true_rel_res": 5.597143e-09,
+  "exec_host": "CN-013/0*0+CN-083/0*0+CN-132/0*0+CN-138/0*0",
+  "allocation": "4:ncpus=72:mpiprocs=72:ompthreads=1:mem=500GB:node_pool=cpu_node",
+  "sample_sha256": "45f5619822183f9c46f2001d289265378d3f8434e649a42d236a735fecb3edd2"
+}

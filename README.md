@@ -121,13 +121,16 @@ and global reductions.
 ## Reproducing the experiments
 
 ```bash
-qsub scripts/atlas/serial_sweep.pbs                 # serial runtime vs problem size
-qsub -v DIM=2,N=4096 scripts/vanda/strong_mpi.pbs   # MPI strong scaling up to 288 cores
-qsub -v DIM=2,N0=512 scripts/vanda/weak_mpi.pbs     # MPI weak scaling
-qsub -v DIM=3,N=512  scripts/vanda/hybrid_omp.pbs   # MPI x OpenMP split
-qsub -v DIM=3,N=512  scripts/vanda/gpu_cuda.pbs     # GPU runs
-python3 analysis/collect.py && python3 analysis/plots.py
+qsub -P YOUR_PROJECT scripts/vanda/scaling_cpu.pbs # serial, strong/weak, MPI choices, hybrid; up to 288 cores
+qsub -P YOUR_PROJECT scripts/vanda/scaling_gpu.pbs # serial checks, 1/2 GPUs, staged/device transport
 ```
+
+See [the task 3 run guide](scripts/vanda/STEP3.md) for exact meshes, timing,
+placement, queue limits and evidence requirements. The original individual PBS
+files are uncalibrated templates. The existing collector/plotting scripts need
+the task 4 update before ingesting the new labelled samples.
+The [task 3 status](report/scaling_step3.md) records the validated 288-core CPU
+results and the outstanding 3D weak/GPU runs; the suite is not yet complete.
 
 ## Validation
 

@@ -1,0 +1,37 @@
+{
+  "status": "partial; task 3 incomplete",
+  "status_time": "2026-11-09T13:48:28+08:00",
+  "cpu_max_verified_physical_cores": 288,
+  "cpu_main_job_id": "1533443.stdct-mgmt-02",
+  "cpu_main_actual_exit_status": 1,
+  "cpu_main_completed_groups": 92,
+  "cpu_main_accepted_samples": 276,
+  "gpu_accepted_samples": 0,
+  "pending": [
+    "complete 3D weak curve including 256 ranks in a new allocation",
+    "run and audit GPU suite"
+  ],
+  "submission_blocker": {
+    "qstat": "connection refused, errno=15010",
+    "qsub": "connection refused, errno=15010",
+    "server": "stdct-mgmt-02",
+    "repair_job_id": null
+  },
+  "raw_evidence": {
+    "archive": "step3-evidence-20261108.tar.gz",
+    "archive_sha256": "e2b0ef1771f36c7e48dd98ea26b18e8181471fe705b40ee4eb28ae716a731c4d",
+    "decompressed_tar_sha256": "a55e9ced6575499f9d027210cbb99ae946ff1b7e67456f6b6099375124d840c0",
+    "vanda_directory": "/home/svu/zheke.chen/project3_1107_step3",
+    "local_extracted_directory": "results/raw/step3-vanda-initial",
+    "local_submission_diagnostic": "results/raw/step3-local/pbs-diagnostic-ui-20261109.txt",
+    "committed_to_git": false
+  },
+  "exports_sha256": {
+    "cpu_main_audit.json": "3a8bcd35849b8b3eb1c25a3c2d02c0d824c26c5a012a805db213032ba29f05ab",
+    "cpu_main_manifest.json": "52682f426c39bf77e17740ff7ff44cba0caa424ba28c69f25fe95c41258ebfe4",
+    "cpu_main_samples.csv": "45f5619822183f9c46f2001d289265378d3f8434e649a42d236a735fecb3edd2",
+    "cpu_main_summary.csv": "72c1f085f92dded1efb3fd82e71cd304174b7ffe0459b93d8b4980b9c45b855b"
+  },
+  "reference_plan_fix": "3D weak mesh is 203 at 256 ranks; serial reference sizes now derived from the same formula",
+  "gpu_fix_validation": "explicit PCG_* MPI exports prepared; cluster execution pending"
+}

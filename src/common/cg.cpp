@@ -71,6 +71,9 @@ CGStats cg_standard(Backend& be, const double* b, double* x, const Params& p) {
     if (bnorm == 0.0) {
         s.converged = true;
     }
+    be.timer().reset();
+    be.barrier();
+    const double start = PhaseTimer::now();
     for (int it = 0; !s.converged && it < p.maxit; ++it) {
         be.apply(d, q);
         const double alpha = rr / T.dot(d, q);
@@ -87,6 +90,8 @@ CGStats cg_standard(Backend& be, const double* b, double* x, const Params& p) {
         T.xpay(d, rr_new / rr, r); // d = r + beta d
         rr = rr_new;
     }
+    be.barrier();
+    s.solve_seconds = be.max_over_ranks(PhaseTimer::now() - start);
 
     be.release(r);
     be.release(d);
@@ -112,13 +117,18 @@ CGStats cg_single_reduction(Backend& be, const double* b, double* x, const Param
 
     CGStats st;
     double bnorm = 0.0; // ||b|| = ||r_0||, taken from the first reduction
+    double start = 0.0;
     double gamma_old = 0.0, alpha_old = 0.0;
     for (int it = 0;; ++it) {
         double g[2];
         T.dot2(r, r, w, r, g); // gamma = (r, r), delta = (A r, r)
         const double gamma = g[0], delta = g[1];
-        if (it == 0)
+        if (it == 0) {
             bnorm = std::sqrt(gamma);
+            be.timer().reset();
+            be.barrier();
+            start = PhaseTimer::now();
+        }
         st.iters = it;
         st.rel_res = bnorm > 0 ? std::sqrt(gamma) / bnorm : 0.0;
         if (it > 0)
@@ -145,6 +155,8 @@ CGStats cg_single_reduction(Backend& be, const double* b, double* x, const Param
         gamma_old = gamma;
         alpha_old = alpha;
     }
+    be.barrier();
+    st.solve_seconds = be.max_over_ranks(PhaseTimer::now() - start);
 
     be.release(r);
     be.release(w);
@@ -169,11 +181,8 @@ Result run_solver(Backend& be, const Params& p) {
     best.t_total = -1.0;
     for (int rep = 0; rep < p.repeat; ++rep) {
         be.timer().reset();
-        be.barrier();
-        const double t0 = PhaseTimer::now();
         stats = cg_solve(be, b, x, p);
-        be.barrier();
-        const double t_total = be.max_over_ranks(PhaseTimer::now() - t0);
+        const double t_total = stats.solve_seconds;
         const double ts = be.max_over_ranks(be.timer().get(Phase::Stencil));
         const double th = be.max_over_ranks(be.timer().get(Phase::Halo));
         const double tr = be.max_over_ranks(be.timer().get(Phase::Reduce));
