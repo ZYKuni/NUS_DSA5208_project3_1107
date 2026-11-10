@@ -26,6 +26,11 @@ For each entry: date, tool, what it was used for, which files or text came from 
   sine-mode solution. CUDA sources were compiled with NVIDIA nvcc; GPU execution
   and team review are pending.
 
+- 2026-11-10, OpenAI Codex: updated section 8 using the audited hybrid CPU table
+  and single-GPU pilot summary, and added coordinate-based checks of CUDA face
+  order and ghost writes. Seven local CTest groups and twelve OpenMP/serial
+  comparisons passed. The expanded CUDA check compiled; device execution is pending.
+
 ## Zheke Chen
 
 - 2026-11-08, OpenAI Codex: inspected current branches and prepared standalone

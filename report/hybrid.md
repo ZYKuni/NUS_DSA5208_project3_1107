@@ -34,14 +34,58 @@ with the manufactured solution of Section 1. The OpenMP solver matched the seria
 solver's iteration count and discrete L2 error (relative tolerance 1e-6) for one
 and several ranks, slab and Cartesian partitions, in both dimensions, and every
 grid point matched the serial solution to rounding error (test_omp). The
-coarse-to-fine error ratio was 3.999. The CUDA checks use the same script on a
-GPU node.
+coarse-to-fine error ratio was 3.999. The independent Vanda CUDA pilot is described below.
 
-Cluster results await C's measurements. For the fixed-core experiment compare
-the fastest of three repeats per rank/thread split at the same global size.
-Report total time and maximum-rank stencil, halo and reduction times. These maxima
-can occur on different ranks. For each GPU transport, compare 1, 2 and 4 GPUs at
-fixed size and report speedup relative to its one-GPU time. Compare transport
-times at equal GPU counts of at least two. Record placement, hardware, compiler,
-MPI build and CUDA version with C's CSVs before attributing a timing difference
-to communication.
+
+### Fixed-core OpenMP experiment
+
+Vanda job 1533443 used four 72-core hosts, Cartesian partitions, blocking halo
+exchange and standard CG. Each entry is the shortest complete solve of three
+independent launches following one warmup. The meshes required 6,512 iterations
+in 2D and 1,109 in 3D for every split. The run used shared memory and TCP for MPI.
+The 36 hybrid samples passed the per-group audit before the job later stopped
+in a separate weak-scaling experiment.
+
+| MPI ranks × threads per rank | 2D, 2048² (s) | 3D, 288³ (s) |
+| --- | ---: | ---: |
+| Pure MPI, 288 ranks | 2.235 | 1.061 |
+| 288 × 1 | 2.290 | 1.078 |
+| 144 × 2 | 3.527 | 1.304 |
+| 72 × 4 | 3.516 | 1.379 |
+| 32 × 9 | 2.635 | 1.764 |
+| 16 × 18 | 2.504 | 2.153 |
+| 4 × 72 | 2.678 | 2.653 |
+
+Among the six hybrid splits, 288 × 1 gave the lowest minimum and median in both
+dimensions. Pure MPI's minimum was slightly lower in each case. The difference
+between pure MPI and the one-thread OpenMP build is small relative to the
+observed repeat ranges, especially in 2D (288 × 1 ranged from 2.290 to 3.128 s).
+
+The best multi-threaded split depended on dimension. In 2D, 16 × 18 took
+2.504 s; in 3D, 144 × 2 took 1.304 s. The 3D phase measurements help explain
+why further reducing the rank count did not improve elapsed time. Between
+288 × 1 and 4 × 72, the reduction-phase maximum fell from 0.704 to 0.533 s,
+while the halo-phase maximum rose from 0.431 to 1.667 s and the stencil/vector
+maximum from 0.337 to 0.729 s. The larger halo time includes waiting for
+neighbours. These maxima can come from different ranks and cannot be added
+to reconstruct wall time. [Matched results and repeat ranges](../results/tables/hybrid_comparison.csv) · [Allocation and audit](scaling_step3.md)
+
+### GPU correctness and outstanding scaling measurements
+
+On Vanda, single-GPU job 1532562 passed the independent stencil and dot checks.
+All six mesh sizes agreed with the serial reference in iteration count and
+reported discrete L2 error across three launches each. At 511², CUDA needed
+1,557 iterations and its maximum recomputed relative residual was 9.693 × 10⁻⁹;
+at 95³ the corresponding values were 350 and 9.797 × 10⁻⁹. A single rank has no
+neighbour to exchange with. Its short pilot times are used for workload sizing.
+[CUDA and serial pilot summaries](../results/validation/step2/vanda_cuda_summary.csv)
+
+The two-host GPU attempt (job 1533509) stopped at the device-pointer MPI
+preflight. The remote rank was missing an environment flag. C's updated launcher
+exports that flag and the halo transport choice explicitly. The queue permits
+two GPUs per job. The remaining experiment compares one versus two GPUs at
+2048² and 256³ with each transport, then compares device-pointer MPI against
+host staging at the same two-GPU placement. Each configuration needs a passing
+small-mesh comparison and three measured solves after warmup. GPU scaling and
+the benefit of direct exchange remain open until those samples pass audit.
+[GPU run and audit procedure](../scripts/vanda/STEP3.md#current-dataset-and-recovery)

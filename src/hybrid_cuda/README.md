@@ -27,3 +27,10 @@ The final `rel_res` is recomputed as the true residual `||b-Ax||/||b||`, outside
 the timed solve, rather than reporting only the recursive CG residual. The
 shared manufactured problem and serial comparison are checked by
 `scripts/check_workload.py`; see `scripts/vanda/STEP2.md` for the cluster pilot.
+
+The standalone check also packs each of the four 2D and six 3D faces of a
+non-square tile, compares the contiguous buffer to a CPU coordinate traversal,
+then checks the full padded field after unpacking. This isolates face-index
+errors before starting the two-host MPI preflight. For formal runs use
+[C's Vanda driver](../../scripts/vanda/STEP3.md#current-dataset-and-recovery),
+which exports the transport to every rank and preserves all three samples.
