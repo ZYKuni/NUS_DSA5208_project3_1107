@@ -1,0 +1,4 @@
+# Versions used to generate the task 4 artifacts (Python 3.12).
+numpy==2.5.3
+pandas==3.0.5
+matplotlib==3.11.1

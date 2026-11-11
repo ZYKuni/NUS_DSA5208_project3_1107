@@ -115,19 +115,37 @@ impl,dim,n,ranks,threads,gpus,decomp,halo,cg,iters,t_total,t_stencil,t_halo,t_re
 ```
 
 Times are in seconds, cover the solve only (not setup or I/O), and are the maximum over ranks.
-`t_stencil`, `t_halo` and `t_reduce` split each run into computation, neighbour communication
-and global reductions.
+`t_stencil`, `t_halo` and `t_reduce` report computation, neighbour communication
+and global-reduction phase maxima. These maxima can come from different ranks
+and overlap; they are not additive parts of the total.
 
 ## Reproducing the experiments
 
 ```bash
-qsub scripts/atlas/serial_sweep.pbs                 # serial runtime vs problem size
-qsub -v DIM=2,N=4096 scripts/vanda/strong_mpi.pbs   # MPI strong scaling up to 288 cores
-qsub -v DIM=2,N0=512 scripts/vanda/weak_mpi.pbs     # MPI weak scaling
-qsub -v DIM=3,N=512  scripts/vanda/hybrid_omp.pbs   # MPI x OpenMP split
-qsub -v DIM=3,N=512  scripts/vanda/gpu_cuda.pbs     # GPU runs
-python3 analysis/collect.py && python3 analysis/plots.py
+qsub -P YOUR_PROJECT scripts/vanda/scaling_cpu.pbs # serial, strong/weak, MPI choices, hybrid; up to 288 cores
+qsub -P YOUR_PROJECT scripts/vanda/scaling_gpu.pbs # serial checks, 1/2 GPUs, staged/device transport
 ```
+
+See [the task 3 run guide](scripts/vanda/STEP3.md) for exact meshes, timing,
+placement, queue limits and evidence requirements. The original individual PBS
+files are uncalibrated templates.
+The [task 3 status](report/scaling_step3.md) records the validated 288-core CPU
+results, both completed weak curves through 256 cores, and audited staged/device
+measurements on one and two GPUs. The planned task 3 matrix is complete.
+
+Reproduce the task 4 analysis from the committed audited CPU/GPU exports:
+
+```bash
+python3 -m pip install -r analysis/requirements-reproduce.txt
+python3 analysis/collect.py
+python3 analysis/plots.py
+```
+
+The [analysis guide](analysis/README.md) defines the baselines and explicit
+data selection. Outputs include 95 selected groups / 285 samples,
+[report tables](results/tables/README.md), [14 figures and a PDF book](results/figures/README.md),
+and [the results discussion](report/analysis_step4.md). Both weak curves reach
+256 cores; GPU comparisons cover one/two A40 GPUs and staged/device transports. No raw log is needed to reproduce these artifacts.
 
 ## Validation
 

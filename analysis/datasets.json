@@ -1,0 +1,50 @@
+{
+  "dataset": "vanda-step3-audited-cpu-and-gpu",
+  "inputs": [
+    {
+      "prefix": "benchmarks/step3/cpu_main",
+      "allow_documented_partial": true,
+      "exclude_groups": [
+        "serial-serial-3d-n202-p1-t1-cart-block-std",
+        "weak-mpi-3d-n32-p1-t1-cart-block-std",
+        "weak-mpi-3d-n64-p8-t1-cart-block-std",
+        "weak-mpi-3d-n128-p64-t1-cart-block-std",
+        "weak-mpi-3d-n192-p216-t1-cart-block-std"
+      ],
+      "sha256": {
+        "samples.csv": "45f5619822183f9c46f2001d289265378d3f8434e649a42d236a735fecb3edd2",
+        "summary.csv": "72c1f085f92dded1efb3fd82e71cd304174b7ffe0459b93d8b4980b9c45b855b",
+        "manifest.json": "52682f426c39bf77e17740ff7ff44cba0caa424ba28c69f25fe95c41258ebfe4",
+        "audit.json": "3a8bcd35849b8b3eb1c25a3c2d02c0d824c26c5a012a805db213032ba29f05ab"
+      }
+    },
+    {
+      "prefix": "benchmarks/step3/cpu_weak3d",
+      "exclude_groups": [
+        "serial-serial-3d-n32-p1-t1-cart-block-std",
+        "serial-serial-3d-n64-p1-t1-cart-block-std",
+        "serial-serial-3d-n128-p1-t1-cart-block-std",
+        "serial-serial-3d-n192-p1-t1-cart-block-std"
+      ],
+      "sha256": {
+        "samples.csv": "87e60b7ec3258365c2676ebbb25b4d5ccb130991056be095270320eb4d025f4e",
+        "summary.csv": "f19f7cca351df4401e530ede1cc2783910c53c5150599423d9aec6cb8ee95b1d",
+        "manifest.json": "21552b8872a594a8a912e7af8a77d1852cbbeae88641964a47f6f6ba65a5895f",
+        "audit.json": "c7f9c182a8f3c1acec5082df2506513d199ab32256a6710e50b792bcbbbd140f"
+      }
+    },
+    {
+      "prefix": "benchmarks/step3/gpu",
+      "sha256": {
+        "samples.csv": "d110aab02010728503e9f6f0b786038a4fb3386f82de42df5a0ab32430e29f69",
+        "summary.csv": "4c95411d9b01e16a3c3f950d10698dd415023f2ed0a612e6c451d92454018fe8",
+        "manifest.json": "a91e880b34c9c9565d95d09d572e23d41923d2bc5cf7ee7b3c785a6db4044e7c",
+        "audit.json": "b1b4cca2516c70c7d81dc5a80f00729f341131992f41bc22935fed8550099dfe"
+      }
+    }
+  ],
+  "exclude_experiments": [
+    "preflight",
+    "pilot"
+  ]
+}

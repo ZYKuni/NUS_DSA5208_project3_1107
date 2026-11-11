@@ -4,6 +4,7 @@
 #include "params.hpp"
 #include "problem.hpp"
 #include "timer.hpp"
+#include <cmath>
 #include <cstdlib>
 #include <cstring>
 #include <cuda_runtime.h>
@@ -54,7 +55,7 @@ struct Halo {
     }
 };
 
-Result run(const Params& p, const Domain& d, bool direct, int rank) {
+Result run(const Params& p, const Domain& d, bool direct, int rank, double stop_tol) {
     const auto t = d.tile;
     const auto n = t.size(), padded = std::size_t(t.nz + 2) * (t.ny + 2) * (t.nx + 2);
     const double h = grid_h(p.n);
@@ -86,7 +87,7 @@ Result run(const Params& p, const Domain& d, bool direct, int rank) {
     check(cudaDeviceSynchronize());
     MPI_Barrier(d.comm);
     double start = MPI_Wtime();
-    while (row.iters < p.maxit && std::sqrt(rho / initial) >= p.tol) {
+    while (row.iters < p.maxit && std::sqrt(rho / initial) >= stop_tol) {
         timer.start(Phase::Halo);
         halo.exchange(d, dir.ptr);
         timer.stop(Phase::Halo);
@@ -164,6 +165,16 @@ int cuda_main(const Params& p, int argc, char** argv) {
     int rank, status = 0;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     try {
+        // --tol remains the true-residual acceptance threshold. A tighter
+        // recursive stopping target can leave room for accumulated roundoff.
+        double stop_tol = p.tol;
+        if (const char* text = std::getenv("PCG_CUDA_STOP_TOL")) {
+            char* end;
+            stop_tol = std::strtod(text, &end);
+            if (end == text || *end || !std::isfinite(stop_tol) || stop_tol <= 0 ||
+                stop_tol > p.tol)
+                throw std::runtime_error("PCG_CUDA_STOP_TOL must be finite, positive and <= --tol");
+        }
         const char* env = std::getenv("PCG_CUDA_HALO");
         std::string mode = env ? env : "staged";
         if ((mode != "device" && mode != "staged") || p.cg != "std" || p.halo != "block")
@@ -192,7 +203,7 @@ int cuda_main(const Params& p, int argc, char** argv) {
         Domain d(p.n, p.dim, p.decomp == "slab");
         Result best;
         for (int i = 0; i < p.repeat; ++i) {
-            auto row = run(p, d, mode == "device", rank);
+            auto row = run(p, d, mode == "device", rank, stop_tol);
             if (!i || row.t_total < best.t_total)
                 best = row;
         }

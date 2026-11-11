@@ -1,0 +1,15 @@
+{
+  "job_id": "1540132.stdct-mgmt-02",
+  "exit_status": 0,
+  "groups": 10,
+  "samples": 30,
+  "scope": "complete suite",
+  "documented_missing_reference_failure": false,
+  "source_hashes_match": true,
+  "placement_verified": true,
+  "serial_comparisons_pass": true,
+  "max_true_rel_res": 4.976624e-09,
+  "exec_host": "CN-133/0*0+CN-136/0*0+CN-137/0*0+CN-139/0*0",
+  "allocation": "4:ncpus=72:mpiprocs=72:ompthreads=1:mem=64gb:node_pool=cpu_node",
+  "sample_sha256": "87e60b7ec3258365c2676ebbb25b4d5ccb130991056be095270320eb4d025f4e"
+}
