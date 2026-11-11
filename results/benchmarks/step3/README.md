@@ -1,7 +1,7 @@
 # Task 3 accepted measurements
 
 The CPU matrix is complete: strong scaling reaches **288 physical cores** and
-both weak curves reach **256**. GPU retry `1540688.stdct-mgmt-02` is pending a
+both weak curves reach **256**. GPU retry `1540912.stdct-mgmt-02` is pending a
 successful complete audit. Failed attempts are retained only as raw evidence.
 
 | Prefix | Scope | Groups / samples | PBS status |

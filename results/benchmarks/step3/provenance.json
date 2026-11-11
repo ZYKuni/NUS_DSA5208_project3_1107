@@ -1,6 +1,6 @@
 {
   "status": "CPU complete; GPU retry awaiting complete audit",
-  "status_time": "2026-11-11T14:55:41+08:00",
+  "status_time": "2026-11-11T15:30:55.244387+08:00",
   "cpu_max_verified_physical_cores": 288,
   "cpu_main_job_id": "1533443.stdct-mgmt-02",
   "cpu_main_actual_exit_status": 1,
@@ -33,14 +33,14 @@
     "cpu_weak3d_summary.csv": "f19f7cca351df4401e530ede1cc2783910c53c5150599423d9aec6cb8ee95b1d"
   },
   "reference_plan_fix": "3D weak mesh is 203 at 256 ranks; serial reference sizes now derived from the same formula",
-  "gpu_fix_validation": "Two-rank device-pointer smoke, expanded kernel/face checks and ten preflight groups passed in 1540133. True/recursive tolerance separation awaits full retry 1540688.",
+  "gpu_fix_validation": "1540688 passed build, expanded GPU kernel checks, two-rank device transfer, all preflight and all large 2D GPU groups; full retry 1540912 requests 16 GB host memory per host and awaits complete audit.",
   "cpu_weak3d_job_id": "1540132.stdct-mgmt-02",
   "cpu_weak3d_actual_exit_status": 0,
   "cpu_combined_groups": 93,
   "cpu_combined_samples": 279,
   "cpu_performance_groups": 85,
   "cpu_performance_samples": 255,
-  "gpu_retry_job_id": "1540688.stdct-mgmt-02",
+  "gpu_retry_job_id": "1540912.stdct-mgmt-02",
   "historical_submission_blocker": {
     "qstat": "connection refused, errno=15010",
     "qsub": "connection refused, errno=15010",
@@ -59,5 +59,9 @@
       },
       "committed_to_git": false
     }
-  ]
+  ],
+  "gpu_retry_memory_per_host": "16gb",
+  "gpu_attempt2_job_id": "1540688.stdct-mgmt-02",
+  "gpu_attempt2_actual_exit_status": 1,
+  "gpu_attempt2_failure": "3D serial n=256 warmup received SIGKILL after complete 2D groups; no host memory was explicitly requested"
 }

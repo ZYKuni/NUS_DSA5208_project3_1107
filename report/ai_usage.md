@@ -89,5 +89,9 @@ For each entry: date, tool, what it was used for, which files or text came from 
   separated CUDA's optional recursive target (`PCG_CUDA_STOP_TOL=5e-9`) from
   its unchanged true-residual acceptance (`--tol 1e-8`). Added independent
   GPU transport/count baseline analysis and stricter GPU evidence auditing.
-  The full GPU retry 1540688 is still awaiting successful execution/audit;
-  its timings are not yet accepted or included in the figures.
+  GPU retry 1540688 passed all large 2D configurations, then the 3D
+  serial-reference warmup was killed by signal 9. Its request had no explicit
+  host memory reservation. Added `mem=16gb` per GPU host and submitted full
+  retry 1540912 with unchanged numerical binaries and accuracy checks. Its
+  complete audit is pending; failed-attempt timings are not yet accepted or
+  included in the figures.

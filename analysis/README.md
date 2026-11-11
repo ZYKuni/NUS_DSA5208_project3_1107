@@ -101,7 +101,7 @@ reaches 288. All five 3D weak points use the same repair allocation. Integer
 rounding gives 32677.449 unknowns/core at n=203 and 256 ranks, 0.276% below
 the base load. No absent endpoint is interpolated.
 
-GPU retry `1540688.stdct-mgmt-02` is pending a successful complete audit. Until
+GPU retry `1540912.stdct-mgmt-02` is pending a successful complete audit. Until
 its four accepted export files and checksums are added to `datasets.json`,
 there are no GPU inputs or performance figures. The collector already checks
 GPU-count/transport baseline isolation and records exact missing GPU meshes.

@@ -1,7 +1,7 @@
 #!/bin/bash -l
 #PBS -N pcg-gpu-scaling
 #PBS -q auto
-#PBS -l select=2:ncpus=36:mpiprocs=1:ompthreads=1:ngpus=1:node_pool=gpu_node
+#PBS -l select=2:ncpus=36:mpiprocs=1:ompthreads=1:ngpus=1:mem=16gb:node_pool=gpu_node
 #PBS -l place=scatter
 #PBS -l walltime=01:00:00
 #PBS -j oe

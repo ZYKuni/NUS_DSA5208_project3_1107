@@ -2,7 +2,7 @@
 
 Task 4 is updated for the completed CPU matrix: reproducible collection,
 derived metrics and report tables. The full 3D weak curve now reaches 256
-cores. GPU measurements are pending the complete audit of retry `1540688`.
+cores. GPU measurements are pending the complete audit of retry `1540912`.
 
 ## Dataset and measurement conventions
 

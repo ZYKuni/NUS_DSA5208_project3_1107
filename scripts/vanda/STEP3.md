@@ -8,9 +8,10 @@ qsub -P YOUR_PROJECT scripts/vanda/scaling_gpu.pbs
 ```
 
 The CPU job requests four exclusive, scattered 72-core hosts for three hours. The
-GPU job requests one GPU on each of two shared hosts for one hour. Vanda's hook
-normalises each one-GPU request to 36 CPUs and 240 GB, even when fewer are
-requested. Record possible shared-host contention when interpreting its measurements. The Vanda
+GPU job requests one GPU, 36 CPUs and 16 GB host memory on each of two shared hosts for one hour.
+Memory and other hook-normalised resources must be read from the archived PBS
+record; site defaults changed across the maintenance interval. Record possible
+shared-host contention when interpreting the measurements. The Vanda
 `batch_gpu` queue advertised a **total** limit of two GPUs per job at inspection;
 the previous four-GPU request was rejected, so the GPU suite uses 1 and 2 GPUs.
 Do not submit the old uncalibrated strong/weak/hybrid/GPU template scripts to
@@ -155,3 +156,10 @@ python3 scripts/audit_scaling.py gpu RAW_GPU_JOB --jobs-json FINAL_JOBS.json \
 Archive scheduler JSON with `qstat -xf -F json JOBID` while job history is still
 available. Check mathematical source and binary hashes against the first run
 before combining CPU exports; preserve any differences in the provenance.
+
+The current script explicitly requests `mem=16gb` per host. Attempt 1540688
+requested no host memory, passed the large 2D groups, then lost the 3D serial
+reference to SIGKILL. Retry 1540912 uses the same source/binaries and supplies
+this memory request as a `qsub -l select=...:mem=16gb:...` override. The frozen
+producer snapshot therefore retains the earlier PBS header; the archived
+scheduler record and submit arguments establish the effective request.

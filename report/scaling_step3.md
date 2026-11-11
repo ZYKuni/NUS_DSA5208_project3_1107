@@ -2,7 +2,7 @@
 
 **Status, 11 November 2026:** the CPU matrix is complete, with strong scaling
 through 288 cores and weak scaling through 256 cores in both dimensions.
-GPU retry `1540688.stdct-mgmt-02` is pending acceptance. Earlier submission
+GPU retry `1540912.stdct-mgmt-02` is pending acceptance. Earlier submission
 attempts were refused on November 9; an explicit urgent-maintenance notice
 appeared on November 10. Login and PBS scheduling recovered on November 11.
 
@@ -125,8 +125,17 @@ the recomputed true residual was 5.582144e-9, below the experiment's 1e-8
 accuracy threshold but above the executable's then-configured 5e-9 threshold.
 The fix preserves strict true-residual exit validation with `--tol 1e-8` and
 sets the recursive target separately with `PCG_CUDA_STOP_TOL=5e-9` on every
-rank. Serial references still stop at 5e-9. Retry `1540688` reruns the full
+rank. Serial references still stop at 5e-9. Retry `1540912` reruns the full
 GPU suite; the failed warmup is not an accepted runtime sample.
+The next attempt, `1540688.stdct-mgmt-02`, passed all four large 2D GPU
+configurations and their serial reference, then exited 1 when its 3D n=256
+serial-reference warmup received SIGKILL. No host memory had been explicitly
+requested in that allocation. The kill is consistent with a memory limit;
+no numerical-check failure was reported. Retry `1540912.stdct-mgmt-02`
+requests 16 GB host memory per GPU host, with the same numerical binaries,
+recursive target and accuracy checks. It reruns the complete suite; the
+previous attempt remains raw evidence until a successful full audit.
+
 The GPU plan is 1/2 GPUs on different hosts, staged/device-pointer modes,
 with preflight serial comparisons before timings. The inspected queue allowed
 at most two GPUs per job. Device-pointer MPI on the selected UCX TCP path

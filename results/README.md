@@ -11,4 +11,4 @@ preflight groups and does not treat the original CPU job's nonzero exit as a
 successful full suite. See [`analysis/README.md`](../analysis/README.md) to
 reproduce the analysis and [`report/analysis_step4.md`](../report/analysis_step4.md)
 for interpretation. Both weak curves now reach 256 physical cores, and strong
-scaling reaches 288. GPU retry 1540688 awaits a successful complete audit.
+scaling reaches 288. GPU retry 1540912 awaits a successful complete audit.
