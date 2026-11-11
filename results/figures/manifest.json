@@ -285,12 +285,44 @@
       ],
       "pdf_sha256": "0bd49e08b704a44ab6d1503f60605297515949fd40dbdb95828d815e2e32b0d1",
       "png_sha256": "83b7959bdf18b589c0b0dbec8cb6fae346fa356b510445a0e20083a0fba5d7b0"
+    },
+    {
+      "name": "gpu_2d_n2048",
+      "title": "2D MPI + CUDA | n=2048 | one versus two GPUs",
+      "caption": "Line/filled marker: minimum; hollow diamond: median; shading: observed min-max (3 runs, not a CI).\nEach transport uses its own one-GPU baseline in the same allocation. Device-pointer MPI over TCP may internally stage.",
+      "groups": [
+        "strong-cuda-2d-n2048-g1-device",
+        "strong-cuda-2d-n2048-g1-staged",
+        "strong-cuda-2d-n2048-g2-device",
+        "strong-cuda-2d-n2048-g2-staged"
+      ],
+      "jobs": [
+        "1540912.stdct-mgmt-02"
+      ],
+      "pdf_sha256": "f1fb16663ea9717d40675b15babd2b32428a51acad60c134391aace512ead626",
+      "png_sha256": "9e5ea595c2ae7ee5a3a18ec44e4036b525481fd3f5e5ea57f471680d6beba629"
+    },
+    {
+      "name": "gpu_3d_n256",
+      "title": "3D MPI + CUDA | n=256 | one versus two GPUs",
+      "caption": "Line/filled marker: minimum; hollow diamond: median; shading: observed min-max (3 runs, not a CI).\nEach transport uses its own one-GPU baseline in the same allocation. Device-pointer MPI over TCP may internally stage.",
+      "groups": [
+        "strong-cuda-3d-n256-g1-device",
+        "strong-cuda-3d-n256-g1-staged",
+        "strong-cuda-3d-n256-g2-device",
+        "strong-cuda-3d-n256-g2-staged"
+      ],
+      "jobs": [
+        "1540912.stdct-mgmt-02"
+      ],
+      "pdf_sha256": "f5529af9c316bb6f69f8abb010cbd57336fec73bba1dd47b94929a708c03783b",
+      "png_sha256": "62d7577bf9bd9a37f6bebf648ceee49b58b9c48696462528d21aaef6c11c6857"
     }
   ],
-  "count": 12,
-  "book_sha256": "3ee9e46066181fb77c23626314c694777003c4668775b1dba34b88cb672f416b",
-  "all_csv_sha256": "cde845bad7d77c8be4139f61a637435064deefa12267ba249d278ce06535921b",
-  "analysis_manifest_sha256": "2f1b150db10931b0645604ceb6a5486b974ea471ace0600fe9761294976514a7",
+  "count": 14,
+  "book_sha256": "a1e69db2fe2015408a79092e329369f596444ccdb6fe4e815bb87dad65421021",
+  "all_csv_sha256": "d1fea55a8965cc0d0a5794e3e1d3fa81b30da77534559ab4e8d6ef832a765dc4",
+  "analysis_manifest_sha256": "1c8949071f3dedca9adc6b46ba0923450a4a6edae4dc9a20cd2aff49c0a9fec0",
   "plotter_sha256": "840f76175fed2a329f67d0906096983696c42d42b8cc5e2354cbd306d13fc91b",
   "coverage": {
     "cpu_series": [
@@ -399,59 +431,10 @@
         "complete": true
       }
     ],
-    "accepted_gpu_groups": 0,
-    "missing_gpu_configurations": [
-      {
-        "dim": 2,
-        "n": 2048,
-        "transport": "device",
-        "gpus": 1
-      },
-      {
-        "dim": 2,
-        "n": 2048,
-        "transport": "device",
-        "gpus": 2
-      },
-      {
-        "dim": 2,
-        "n": 2048,
-        "transport": "staged",
-        "gpus": 1
-      },
-      {
-        "dim": 2,
-        "n": 2048,
-        "transport": "staged",
-        "gpus": 2
-      },
-      {
-        "dim": 3,
-        "n": 256,
-        "transport": "device",
-        "gpus": 1
-      },
-      {
-        "dim": 3,
-        "n": 256,
-        "transport": "device",
-        "gpus": 2
-      },
-      {
-        "dim": 3,
-        "n": 256,
-        "transport": "staged",
-        "gpus": 1
-      },
-      {
-        "dim": 3,
-        "n": 256,
-        "transport": "staged",
-        "gpus": 2
-      }
-    ],
-    "gpu_status": "unavailable",
-    "task3_complete": false
+    "accepted_gpu_groups": 8,
+    "missing_gpu_configurations": [],
+    "gpu_status": "complete",
+    "task3_complete": true
   },
   "versions": {
     "python": "3.12.11",
@@ -459,10 +442,5 @@
     "pandas": "3.0.5",
     "numpy": "2.5.3"
   },
-  "skipped": [
-    {
-      "figure": "gpu_scaling",
-      "reason": "No accepted GPU measurements"
-    }
-  ]
+  "skipped": []
 }

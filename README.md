@@ -130,10 +130,10 @@ See [the task 3 run guide](scripts/vanda/STEP3.md) for exact meshes, timing,
 placement, queue limits and evidence requirements. The original individual PBS
 files are uncalibrated templates.
 The [task 3 status](report/scaling_step3.md) records the validated 288-core CPU
-results, the completed 3D weak repair through 256 cores, and the GPU retry
-awaiting a successful audit. The CPU matrix is complete.
+results, both completed weak curves through 256 cores, and audited staged/device
+measurements on one and two GPUs. The planned task 3 matrix is complete.
 
-Reproduce the task 4 analysis from the committed audited CPU exports:
+Reproduce the task 4 analysis from the committed audited CPU/GPU exports:
 
 ```bash
 python3 -m pip install -r analysis/requirements-reproduce.txt
@@ -142,11 +142,10 @@ python3 analysis/plots.py
 ```
 
 The [analysis guide](analysis/README.md) defines the baselines and explicit
-data selection. Outputs include 85 CPU performance groups / 255 samples,
-[report tables](results/tables/README.md), [12 figures and a PDF book](results/figures/README.md),
-and [the results discussion](report/analysis_step4.md). The full 3D weak curve is measured through 256 cores. GPU measurements await
-a successful full-suite audit; no raw log is needed to reproduce these CPU
-artifacts.
+data selection. Outputs include 95 selected groups / 285 samples,
+[report tables](results/tables/README.md), [14 figures and a PDF book](results/figures/README.md),
+and [the results discussion](report/analysis_step4.md). Both weak curves reach
+256 cores; GPU comparisons cover one/two A40 GPUs and staged/device transports. No raw log is needed to reproduce these artifacts.
 
 ## Validation
 

@@ -39,9 +39,16 @@ finite values, convergence, three distinct repeats, same-mesh serial comparisons
 and the exact correspondence between the fastest sample and its exported
 iteration/phase values. It recomputes summary statistics from samples.
 The eight CPU `preflight` groups are excluded from performance analysis; no
-measured outlier is removed. The current result is **85 groups / 255 independent
+measured outlier is removed. The selected CPU matrix has **85 groups / 255 independent
 samples**. The serial n=203 reference was measured in the repair allocation;
 its allocation difference is recorded in the serial figures.
+
+The complete GPU export from `1540912.stdct-mgmt-02` contains 20 groups /
+60 samples: ten preflight groups, two serial-reference groups, and eight GPU
+strong-scaling groups. Its ten preflight groups are excluded from performance
+analysis. Together the selected inputs contain **95 groups / 285 samples**,
+including the two GPU serial references. Both CPU and GPU audits pass; their
+original allocation and resource labels remain separate.
 
 ## Metrics and plots
 
@@ -80,34 +87,30 @@ its allocation difference is recorded in the serial figures.
 
 ## Outputs
 
-- `results/all.csv`: the 85 selected configurations, statistics and applicable
+- `results/all.csv`: the 95 selected configurations, statistics and applicable
   derived metrics. Blank metrics mean not applicable, not zero.
-- `results/analysis_samples.csv`: all 255 selected repetitions.
+- `results/analysis_samples.csv`: all 285 selected repetitions.
 - `results/<experiment>_<impl>_<dim>d.csv`: split views of the same groups.
 - `results/tables/*.csv`: traceable report tables, with group and job IDs.
 - `results/analysis_manifest.json`: input/code/output hashes, exact exclusions,
   software versions, counts and missing endpoints.
-- `results/figures/`: 12 vector PDFs and matching PNGs, a 12-page figure book,
+- `results/figures/`: 14 vector PDFs and matching PNGs, a 14-page figure book,
   and an index with file hashes and exact contributing group IDs.
 
 The plotter checks the collector's output hashes before reading the data and
 rejects mixed-allocation strong/weak/variant/hybrid series. The figure manifest
 is authoritative for the current generated figure set.
 
-## Coverage and later GPU export
+## Completed coverage
 
-Both CPU weak curves now reach **256 physical cores**; CPU strong scaling
-reaches 288. All five 3D weak points use the same repair allocation. Integer
-rounding gives 32677.449 unknowns/core at n=203 and 256 ranks, 0.276% below
-the base load. No absent endpoint is interpolated.
-
-GPU retry `1540912.stdct-mgmt-02` is pending a successful complete audit. Until
-its four accepted export files and checksums are added to `datasets.json`,
-there are no GPU inputs or performance figures. The collector already checks
-GPU-count/transport baseline isolation and records exact missing GPU meshes.
-After adding an accepted export, rerun collection, tests and plots, review
-coverage, and render the new PDF pages for inspection. Never reuse CPU core
-efficiency as GPU efficiency.
+Both CPU weak curves reach **256 physical cores**; CPU strong scaling reaches
+288. All five 3D weak points use the same repair allocation. Integer rounding
+gives 32677.449 unknowns/core at n=203 and 256 ranks, 0.276% below the base load.
+GPU strong scaling covers 2D n=2048 and 3D n=256 on one and two A40 GPUs,
+for both staged and device-pointer transports. Two GPUs use different hosts.
+No absent point is interpolated, and GPU speedup uses its own same-transport
+one-GPU baseline. CPU-core efficiency is never reused as GPU efficiency.
+The analysis manifest records no missing planned CPU or GPU configuration.
 
 See [the results discussion](../report/analysis_step4.md) and
 [the figure index](../results/figures/README.md).

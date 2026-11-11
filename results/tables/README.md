@@ -13,6 +13,7 @@ are in `../analysis_samples.csv`; input hashes and exclusions are in
 | `weak_scaling.csv` | 10 | Five points in each dimension, both through 256 physical cores |
 | `variant_comparison.csv` | 16 | Four halo/CG choices at 64/256 cores, both dimensions |
 | `hybrid_comparison.csv` | 12 | Six MPI/OpenMP splits at fixed 288 cores, both dimensions |
+| `gpu_scaling.csv` | 8 | Two meshes, staged/device transports, one/two A40 GPUs |
 
 `speedup`/`efficiency` apply to strong scaling with each decomposition's own
 one-rank MPI reference. `matched_mpi_ratio` is a same-resource comparison for
@@ -21,3 +22,9 @@ variants/hybrid. `weak_solve_ratio` includes convergence growth;
 and `_high` columns are defined in [the analysis guide](../../analysis/README.md).
 Blank entries are intentionally inapplicable. Independent phase maxima are
 not additive and their sum is not a communication fraction.
+
+`gpu_speedup` and `gpu_efficiency` use each transport's own one-GPU baseline
+in the same job and mesh. `staged_over_transport` compares staging and the
+selected transport at the same GPU count. GPU count is not a CPU core count.
+The two serial reference groups for the GPU suite are separately retained in
+`../reference_serial_2d.csv` and `../reference_serial_3d.csv`.

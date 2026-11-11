@@ -163,3 +163,9 @@ reference to SIGKILL. Retry 1540912 uses the same source/binaries and supplies
 this memory request as a `qsub -l select=...:mem=16gb:...` override. The frozen
 producer snapshot therefore retains the earlier PBS header; the archived
 scheduler record and submit arguments establish the effective request.
+
+The accepted GPU retry is `1540912.stdct-mgmt-02` (complete suite, exit zero,
+20 groups / 60 samples), on GN-A40-028 and GN-A40-006. Its `gpu_*` exports
+include all validation preflight and serial-reference groups. The selected
+CPU/GPU analysis contains 95 groups / 285 samples after explicit exclusions.
+See the accepted-data README for exact archived-source audit commands.

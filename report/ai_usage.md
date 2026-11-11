@@ -92,6 +92,12 @@ For each entry: date, tool, what it was used for, which files or text came from 
   GPU retry 1540688 passed all large 2D configurations, then the 3D
   serial-reference warmup was killed by signal 9. Its request had no explicit
   host memory reservation. Added `mem=16gb` per GPU host and submitted full
-  retry 1540912 with unchanged numerical binaries and accuracy checks. Its
-  complete audit is pending; failed-attempt timings are not yet accepted or
-  included in the figures.
+  retry 1540912 with unchanged numerical binaries and accuracy checks. That
+  retry exited zero and passed all seven CTest groups, GPU arithmetic/face
+  checks, the two-rank device-pointer probe, all ten preflight groups, and a
+  complete independent audit (20 groups / 60 samples). Added eight CUDA
+  configurations and two serial references to the selected analysis, yielding
+  95 groups / 285 samples and complete planned CPU/GPU coverage. Updated the
+  results discussion and 14 figures plus a 14-page PDF book. All 16 analysis
+  regression tests passed against the final inputs; every PDF page was rendered
+  and inspected. Earlier failed-attempt timings remain excluded.

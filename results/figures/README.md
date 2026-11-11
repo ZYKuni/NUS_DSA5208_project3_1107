@@ -1,6 +1,6 @@
-# CPU scaling figure index
+# CPU and GPU scaling figure index
 
-The [12-page figure book](scaling_figures.pdf) contains all figures below in
+The [14-page figure book](scaling_figures.pdf) contains all figures below in
 page order. Individual PDFs are vector graphics; matching `.png` files are
 provided for preview. `manifest.json` records checksums, source group IDs,
 analysis input hashes and plotting-library versions.
@@ -19,6 +19,8 @@ analysis input hashes and plotting-library versions.
 | 10 | [3D MPI choices](variants_3d_n288.pdf) | Same four choices at 64 and 256 cores |
 | 11 | [2D hybrid](hybrid_2d_n2048.pdf) | Six MPI/OpenMP splits of fixed 288 physical cores |
 | 12 | [3D hybrid](hybrid_3d_n288.pdf) | Same fixed-resource comparison |
+| 13 | [2D GPU scaling](gpu_2d_n2048.pdf) | One/two A40 GPUs, staged/device; time, speedup and GPU efficiency |
+| 14 | [3D GPU scaling](gpu_3d_n256.pdf) | Same GPU comparison at n=256 |
 
 Filled points/lines use minimum whole-solve time; hollow diamonds use medians;
 shading retains observed ranges from three independent processes. Phase lines
@@ -27,7 +29,8 @@ baselines described in [the analysis guide](../../analysis/README.md).
 Ranges are not confidence intervals. Time, size and CPU count axes are
 logarithmic; ratio y axes are linear and superlinear values are not clipped.
 
-These figures use 85 groups / 255 samples after excluding eight preflight
-groups. **No GPU performance figure is available.** No absent measurement is
-interpolated. See [the discussion](../../report/analysis_step4.md) for limits,
-the meaning of weak-scaling ratios and the GPU retry status.
+These figures use 95 groups / 285 samples after excluding eighteen CPU/GPU
+preflight groups. GPU figures use same-allocation, same-transport one-GPU
+baselines; device-pointer MPI over TCP does not imply GPUDirect RDMA.
+No absent measurement is interpolated. See [the discussion](../../report/analysis_step4.md) for limits,
+the meaning of weak-scaling ratios and the completed task 3 coverage.

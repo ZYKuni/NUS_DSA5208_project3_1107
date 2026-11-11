@@ -1,8 +1,9 @@
-# Task 4: CPU result analysis and report figures
+# Task 4: CPU/GPU result analysis and report figures
 
 Task 4 is updated for the completed CPU matrix: reproducible collection,
 derived metrics and report tables. The full 3D weak curve now reaches 256
-cores. GPU measurements are pending the complete audit of retry `1540912`.
+cores. GPU retry `1540912.stdct-mgmt-02` also passed the complete audit; the planned
+CPU/GPU matrix is complete.
 
 ## Dataset and measurement conventions
 
@@ -17,6 +18,13 @@ are excluded from performance analysis. The remaining **85 groups / 255 samples*
 There is one excluded warmup and three separate measured processes per group.
 All 255 retained CPU samples pass true residual <1e-8 and the same-mesh serial
 iteration/error checks. Failed/cancelled jobs and raw logs are not inputs.
+
+The successful GPU suite adds 20 groups / 60 samples, of which ten preflight
+groups / 30 samples are validation evidence only. The two GPU serial references
+and eight GPU strong configurations add ten selected groups / 30 samples.
+The final analysis therefore contains **95 groups / 285 samples**: 11 CPU
+serial, two GPU serial-reference, 48 strong, ten weak, 12 MPI-choice and 12
+hybrid configurations. Original per-job exports retain every preflight group.
 
 Timings cover the CG loop, including the end barrier, excluding setup,
 allocation, validation and process launch. The primary statistic is the minimum
@@ -149,6 +157,46 @@ effects are possible contributors, but assigning causality would require
 additional profiling. The comparison is a same-resource runtime ratio, not
 an OpenMP speedup curve or a claim that all OpenMP workloads scale poorly.
 
+## MPI + CUDA on one and two GPUs
+
+Figures 13 and 14 use job `1540912.stdct-mgmt-02` on GN-A40-028 and GN-A40-006,
+one NVIDIA A40 per MPI rank and host. The build passed seven CTest groups,
+independent stencil/dot/face checks, a two-rank device-pointer transfer probe,
+and all ten small-mesh preflight groups before the large meshes were timed.
+All 60 retained suite samples passed the true-residual threshold (<1e-8) and
+same-mesh serial iteration/error comparisons. The recursive stopping target
+is 5e-9; the executable independently enforces `--tol 1e-8` on true residual.
+
+| Mesh | Transport | GPUs | Min (s) | Median (s) | CV | Speedup | GPU efficiency |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 2D n=2048 | device | 1 | 6.215259 | 6.218436 | 0.05% | 1.000 | 100.00% |
+| 2D n=2048 | device | 2 | 5.069166 | 5.226168 | 2.08% | 1.226 | 61.30% |
+| 2D n=2048 | staged | 1 | 6.213837 | 6.217811 | 0.06% | 1.000 | 100.00% |
+| 2D n=2048 | staged | 2 | 4.358878 | 4.369072 | 11.89% | 1.426 | 71.28% |
+| 3D n=256 | device | 1 | 4.238899 | 4.239031 | 0.02% | 1.000 | 100.00% |
+| 3D n=256 | device | 2 | 2.983993 | 2.987092 | 0.29% | 1.421 | 71.03% |
+| 3D n=256 | staged | 1 | 4.238452 | 4.239921 | 0.02% | 1.000 | 100.00% |
+| 3D n=256 | staged | 2 | 2.860062 | 2.867455 | 1.77% | 1.482 | 74.10% |
+
+Both meshes benefit from the second GPU in these measurements. With staged
+halos, the minimum-based speedup is 1.426 in 2D and 1.482 in 3D, corresponding
+to GPU efficiencies of 71.28% and 74.10%. Device-pointer transport has a higher
+two-GPU minimum in both meshes: 5.069166 versus 4.358878 s in 2D, and 2.983993
+versus 2.860062 s in 3D. Thus the device-pointer API does not guarantee a lower
+measured runtime on this path. The 2D staged group has CV 11.89%, and its
+observed range overlaps the device group's range; the table does not establish
+a statistically reliable transport advantage from three ordered repetitions.
+
+Speedup and efficiency use each transport's own one-GPU reference in this same
+allocation. The minimum comes from one complete sample, and medians, ranges
+and CV remain available in the traceable GPU table. Only one and two GPUs are
+measured; these results do not establish scaling beyond two devices. Hosts
+are shared and phase maxima are non-additive. The UCX path selects TCP and
+CUDA copy/IPC support; passing device pointers may still stage internally.
+These measurements do not establish GPUDirect RDMA or isolate transport cost
+from all other runtime variation. The CPU and GPU 3D meshes differ, and no
+cross-platform CPU-core/GPU efficiency metric is claimed.
+
 ## Reproduction and limits
 
 [`analysis/README.md`](../analysis/README.md) gives the complete commands,
@@ -162,6 +210,6 @@ and the assembled CPU selection.
 Phase maxima may occur on different ranks; their intervals can overlap. Their
 sum/total diagnostic ranges up to about 1.59 in this dataset. Stacking those
 values or labelling their sum a communication fraction would be misleading.
-No failed GPU attempt is a runtime result, and no CPU/GPU speedup is claimed.
-The GPU retry still needs a successful full audit before those results can
-be incorporated.
+No failed GPU attempt or excluded warmup is a runtime result. Task 3 coverage
+is complete; three repeats and two GPU counts remain limits on inference.
+No unmeasured CPU/GPU speedup or causal transport benefit is claimed.

@@ -2,7 +2,8 @@
 
 **Status, 11 November 2026:** the CPU matrix is complete, with strong scaling
 through 288 cores and weak scaling through 256 cores in both dimensions.
-GPU retry `1540912.stdct-mgmt-02` is pending acceptance. Earlier submission
+GPU job `1540912.stdct-mgmt-02` also passed the complete independent audit,
+covering both planned meshes and transports on one and two GPUs. Earlier submission
 attempts were refused on November 9; an explicit urgent-maintenance notice
 appeared on November 10. Login and PBS scheduling recovered on November 11.
 
@@ -98,7 +99,37 @@ increase. Two-dimensional scaling is non-monotonic; for example, 64-core
 Cartesian time is 1.266300 s. Its superlinear speedup alone does not establish
 a cause such as cache effects; this needs further analysis in task 4.
 
-## Documented failure and pending supplement
+## Completed GPU measurements
+
+Job `1540912.stdct-mgmt-02` used one A40 GPU on each of GN-A40-028 and
+GN-A40-006, with one rank per host. It ran on November 11, 16:27-16:47 Singapore
+(recorded walltime 00:20:04), with 16 GB host memory per host. PBS exited zero. The independent audit
+accepted all **20 groups / 60 samples**: ten small-mesh preflight groups,
+two serial-reference groups and eight formal CUDA configurations. The build
+passed all seven CTest groups; B's expanded stencil/dot/halo-face checks and
+the two-host device-pointer MPI probe passed before workload measurements.
+Every sample passed true residual <1e-8 and same-mesh serial iteration/error
+agreement. The source hashes match the frozen successful-run snapshot.
+
+| Mesh | Transport | GPUs | Min (s) | Median (s) | CV | Speedup | GPU efficiency |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 2D n=2048 | device | 1 | 6.215259 | 6.218436 | 0.05% | 1.000 | 100.00% |
+| 2D n=2048 | device | 2 | 5.069166 | 5.226168 | 2.08% | 1.226 | 61.30% |
+| 2D n=2048 | staged | 1 | 6.213837 | 6.217811 | 0.06% | 1.000 | 100.00% |
+| 2D n=2048 | staged | 2 | 4.358878 | 4.369072 | 11.89% | 1.426 | 71.28% |
+| 3D n=256 | device | 1 | 4.238899 | 4.239031 | 0.02% | 1.000 | 100.00% |
+| 3D n=256 | device | 2 | 2.983993 | 2.987092 | 0.29% | 1.421 | 71.03% |
+| 3D n=256 | staged | 1 | 4.238452 | 4.239921 | 0.02% | 1.000 | 100.00% |
+| 3D n=256 | staged | 2 | 2.860062 | 2.867455 | 1.77% | 1.482 | 74.10% |
+
+Each transport uses its own one-GPU baseline within this allocation. Hosts
+are shared, and three repeats provide descriptive ranges rather than confidence
+intervals. Device-pointer MPI on UCX's selected TCP path may stage internally;
+these results do not establish GPUDirect RDMA. No scaling beyond two GPUs or
+CPU-core/GPU efficiency conversion is claimed. The traceable GPU table retains
+all medians, ranges, CV, phase values and group IDs.
+
+## Documented failed attempts
 
 The CPU job's **actual PBS exit status is 1**. After completing the 92 groups,
 the driver reached 3D weak scaling at 256 ranks and raised `KeyError: (3, 203)`:
@@ -125,16 +156,15 @@ the recomputed true residual was 5.582144e-9, below the experiment's 1e-8
 accuracy threshold but above the executable's then-configured 5e-9 threshold.
 The fix preserves strict true-residual exit validation with `--tol 1e-8` and
 sets the recursive target separately with `PCG_CUDA_STOP_TOL=5e-9` on every
-rank. Serial references still stop at 5e-9. Retry `1540912` reruns the full
-GPU suite; the failed warmup is not an accepted runtime sample.
-The next attempt, `1540688.stdct-mgmt-02`, passed all four large 2D GPU
+rank. Serial references still stop at 5e-9. The failed warmup remains excluded
+from performance data. The next attempt, `1540688.stdct-mgmt-02`, passed all four large 2D GPU
 configurations and their serial reference, then exited 1 when its 3D n=256
 serial-reference warmup received SIGKILL. No host memory had been explicitly
 requested in that allocation. The kill is consistent with a memory limit;
 no numerical-check failure was reported. Retry `1540912.stdct-mgmt-02`
 requests 16 GB host memory per GPU host, with the same numerical binaries,
-recursive target and accuracy checks. It reruns the complete suite; the
-previous attempt remains raw evidence until a successful full audit.
+recursive target and accuracy checks. The full rerun passed; the
+previous attempt remains excluded raw evidence.
 
 The GPU plan is 1/2 GPUs on different hosts, staged/device-pointer modes,
 with preflight serial comparisons before timings. The inspected queue allowed
@@ -148,8 +178,8 @@ The accepted CSVs, original manifest, audit and archive hashes are in
 The original archive and frozen source/logs are preserved locally and on
 Vanda, outside Git. Reproduction and the exact supplement commands are in
 [`scripts/vanda/STEP3.md`](../scripts/vanda/STEP3.md#current-dataset-and-recovery).
-The CPU supplement's archive, final scheduler record and successful audit are
-preserved. The GPU retry still needs a complete successful audit before task 3
-can be declared complete.
-Task 4's collector and CPU figures are now available in
-[`analysis_step4.md`](analysis_step4.md), with these measurement gaps retained.
+The CPU supplement and GPU retry archives, final scheduler records and
+successful audits are preserved. The planned task 3 matrix is complete.
+Task 4 now incorporates **95 selected groups / 285 samples** in 14 figures
+and the discussion in [`analysis_step4.md`](analysis_step4.md). Task 5 has
+not been started.

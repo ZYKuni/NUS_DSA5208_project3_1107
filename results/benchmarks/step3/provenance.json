@@ -1,15 +1,13 @@
 {
-  "status": "CPU complete; GPU retry awaiting complete audit",
-  "status_time": "2026-11-11T15:30:55.244387+08:00",
+  "status": "complete audited planned CPU/GPU matrix",
+  "status_time": "2026-11-11T19:34:45.310583+08:00",
   "cpu_max_verified_physical_cores": 288,
   "cpu_main_job_id": "1533443.stdct-mgmt-02",
   "cpu_main_actual_exit_status": 1,
   "cpu_main_completed_groups": 92,
   "cpu_main_accepted_samples": 276,
-  "gpu_accepted_samples": 0,
-  "pending": [
-    "run and audit complete GPU suite"
-  ],
+  "gpu_accepted_samples": 60,
+  "pending": [],
   "raw_evidence": {
     "archive": "step3-evidence-20261108.tar.gz",
     "archive_sha256": "e2b0ef1771f36c7e48dd98ea26b18e8181471fe705b40ee4eb28ae716a731c4d",
@@ -30,10 +28,14 @@
     "cpu_weak3d_audit.json": "c7f9c182a8f3c1acec5082df2506513d199ab32256a6710e50b792bcbbbd140f",
     "cpu_weak3d_manifest.json": "21552b8872a594a8a912e7af8a77d1852cbbeae88641964a47f6f6ba65a5895f",
     "cpu_weak3d_samples.csv": "87e60b7ec3258365c2676ebbb25b4d5ccb130991056be095270320eb4d025f4e",
-    "cpu_weak3d_summary.csv": "f19f7cca351df4401e530ede1cc2783910c53c5150599423d9aec6cb8ee95b1d"
+    "cpu_weak3d_summary.csv": "f19f7cca351df4401e530ede1cc2783910c53c5150599423d9aec6cb8ee95b1d",
+    "gpu_audit.json": "b1b4cca2516c70c7d81dc5a80f00729f341131992f41bc22935fed8550099dfe",
+    "gpu_manifest.json": "a91e880b34c9c9565d95d09d572e23d41923d2bc5cf7ee7b3c785a6db4044e7c",
+    "gpu_samples.csv": "d110aab02010728503e9f6f0b786038a4fb3386f82de42df5a0ab32430e29f69",
+    "gpu_summary.csv": "4c95411d9b01e16a3c3f950d10698dd415023f2ed0a612e6c451d92454018fe8"
   },
   "reference_plan_fix": "3D weak mesh is 203 at 256 ranks; serial reference sizes now derived from the same formula",
-  "gpu_fix_validation": "1540688 passed build, expanded GPU kernel checks, two-rank device transfer, all preflight and all large 2D GPU groups; full retry 1540912 requests 16 GB host memory per host and awaits complete audit.",
+  "gpu_fix_validation": "Full 1540912 suite and independent audit passed: seven CTest groups, expanded GPU arithmetic/halo-face checks, both ranks with one visible GPU and device-pointer MPI, all preflight, accuracy and serial comparisons.",
   "cpu_weak3d_job_id": "1540132.stdct-mgmt-02",
   "cpu_weak3d_actual_exit_status": 0,
   "cpu_combined_groups": 93,
@@ -58,10 +60,30 @@
         "1540133.stdct-mgmt-02": 1
       },
       "committed_to_git": false
+    },
+    {
+      "archive": "step3-complete-20261111.tar.gz",
+      "archive_sha256": "0e277c35ab9f94195a163d4677f03b3a39a814358561ce39b1e2d5b591d761b8",
+      "decompressed_tar_sha256": "02372a12945d5d259a5631b1e4dfb79e59e8cbbb0baf74a9eb70c9da51f9b3af",
+      "local_extracted_directory": "results/raw/step3-vanda-final-20261111",
+      "committed_to_git": false,
+      "jobs": {
+        "1540132.stdct-mgmt-02": 0,
+        "1540912.stdct-mgmt-02": 0
+      },
+      "archived_failed_gpu_job": {
+        "1540688.stdct-mgmt-02": 1
+      }
     }
   ],
   "gpu_retry_memory_per_host": "16gb",
   "gpu_attempt2_job_id": "1540688.stdct-mgmt-02",
   "gpu_attempt2_actual_exit_status": 1,
-  "gpu_attempt2_failure": "3D serial n=256 warmup received SIGKILL after complete 2D groups; no host memory was explicitly requested"
+  "gpu_attempt2_failure": "3D serial n=256 warmup received SIGKILL after complete 2D groups; no host memory was explicitly requested",
+  "gpu_job_id": "1540912.stdct-mgmt-02",
+  "gpu_actual_exit_status": 0,
+  "gpu_accepted_groups": 20,
+  "gpu_preflight_groups": 10,
+  "selected_analysis_groups": 95,
+  "selected_analysis_samples": 285
 }

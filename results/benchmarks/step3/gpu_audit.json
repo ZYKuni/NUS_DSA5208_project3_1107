@@ -1,0 +1,15 @@
+{
+  "job_id": "1540912.stdct-mgmt-02",
+  "exit_status": 0,
+  "groups": 20,
+  "samples": 60,
+  "scope": "complete suite",
+  "documented_missing_reference_failure": false,
+  "source_hashes_match": true,
+  "placement_verified": true,
+  "serial_comparisons_pass": true,
+  "max_true_rel_res": 5.582144e-09,
+  "exec_host": "GN-A40-028/1*36+GN-A40-006/1*36",
+  "allocation": "2:ncpus=36:mpiprocs=1:ompthreads=1:ngpus=1:mem=16gb:node_pool=gpu_node",
+  "sample_sha256": "d110aab02010728503e9f6f0b786038a4fb3386f82de42df5a0ab32430e29f69"
+}

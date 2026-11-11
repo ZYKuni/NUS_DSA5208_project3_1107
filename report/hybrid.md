@@ -70,7 +70,7 @@ maximum from 0.337 to 0.729 s. The larger halo time includes waiting for
 neighbours. These maxima can come from different ranks and cannot be added
 to reconstruct wall time. [Matched results and repeat ranges](../results/tables/hybrid_comparison.csv) · [Allocation and audit](scaling_step3.md)
 
-### GPU correctness and outstanding scaling measurements
+### GPU correctness and formal scaling measurements
 
 On Vanda, single-GPU job 1532562 passed the independent stencil and dot checks.
 All six mesh sizes agreed with the serial reference in iteration count and
@@ -80,12 +80,37 @@ at 95³ the corresponding values were 350 and 9.797 × 10⁻⁹. A single rank h
 neighbour to exchange with. Its short pilot times are used for workload sizing.
 [CUDA and serial pilot summaries](../results/validation/step2/vanda_cuda_summary.csv)
 
-The two-host GPU attempt (job 1533509) stopped at the device-pointer MPI
-preflight. The remote rank was missing an environment flag. C's updated launcher
-exports that flag and the halo transport choice explicitly. The queue permits
-two GPUs per job. The remaining experiment compares one versus two GPUs at
-2048² and 256³ with each transport, then compares device-pointer MPI against
-host staging at the same two-GPU placement. Each configuration needs a passing
-small-mesh comparison and three measured solves after warmup. GPU scaling and
-the benefit of direct exchange remain open until those samples pass audit.
-[GPU run and audit procedure](../scripts/vanda/STEP3.md#current-dataset-and-recovery)
+The initial two-host attempt 1533509 stopped because a device-test flag did
+not reach the remote rank. Explicit MPI environment exports fixed that probe.
+Attempt 1540133 then passed the probe and expanded GPU face checks but stopped
+at an excluded warmup because the recursive stopping target and true-residual
+exit threshold had both been set to 5e-9. The accepted experiment requires true
+residual <1e-8. The successful retry uses a 5e-9 recursive target separately
+from the executable's strict 1e-8 true-residual acceptance.
+
+Attempt 1540688 later completed the large 2D cases but its 3D serial
+reference received SIGKILL without an explicit host-memory reservation.
+The final retry requested 16 GB host memory per host.
+
+Formal job 1540912 passed the complete audit on GN-A40-028 and GN-A40-006,
+using one NVIDIA A40 per rank and host. All ten preflight groups passed before
+large-mesh timing. Each formal configuration has one excluded warmup and three
+independent measured launches, checked against the same-mesh serial reference.
+
+| Mesh | Transport | GPUs | Min (s) | Median (s) | CV | Speedup | GPU efficiency |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 2D n=2048 | device | 1 | 6.215259 | 6.218436 | 0.05% | 1.000 | 100.00% |
+| 2D n=2048 | device | 2 | 5.069166 | 5.226168 | 2.08% | 1.226 | 61.30% |
+| 2D n=2048 | staged | 1 | 6.213837 | 6.217811 | 0.06% | 1.000 | 100.00% |
+| 2D n=2048 | staged | 2 | 4.358878 | 4.369072 | 11.89% | 1.426 | 71.28% |
+| 3D n=256 | device | 1 | 4.238899 | 4.239031 | 0.02% | 1.000 | 100.00% |
+| 3D n=256 | device | 2 | 2.983993 | 2.987092 | 0.29% | 1.421 | 71.03% |
+| 3D n=256 | staged | 1 | 4.238452 | 4.239921 | 0.02% | 1.000 | 100.00% |
+| 3D n=256 | staged | 2 | 2.860062 | 2.867455 | 1.77% | 1.482 | 74.10% |
+
+Speedup and GPU efficiency use the same job, mesh and transport at one GPU.
+The device-pointer path uses CUDA-aware MPI over the selected UCX TCP path,
+which may stage internally; no GPUDirect RDMA claim follows from passing a
+device pointer. The shared hosts, observed repeat ranges and only two GPU
+counts limit inference. See the [traceable GPU table](../results/tables/gpu_scaling.csv),
+[full allocation and audit](scaling_step3.md), and [GPU figures](../results/figures/README.md).
