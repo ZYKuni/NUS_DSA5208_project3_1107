@@ -2,11 +2,14 @@
 
 DSA5208 Project 3, AY2026/27 Semester 1, National University of Singapore.
 
+**The final report is [`report/report.pdf`](report/report.pdf).** It contains the algorithm
+description, parallelisation design, validation, serial/MPI/MPI+X scaling results and discussion.
+
 | Name | Student ID | Main responsibility |
 | --- | --- | --- |
 | Yikun Zhao | A0353894M | Serial and MPI solvers, validation, report editing |
 | Jiahao Zhou | A0354090J | MPI + OpenMP and MPI + CUDA solvers |
-| Zheke Chen | A0356140M | Cluster builds, benchmarks on Vanda/Atlas, figures |
+| Zheke Chen | A0356140M | Cluster builds, benchmarks on Vanda, analysis and figures |
 
 ## Problem
 
@@ -33,8 +36,8 @@ apps/             one main() per executable
 tests/            validation tests
 scripts/          build script, PBS job scripts for Vanda and Atlas (owner: Zheke)
 analysis/         result collection and plotting     (owner: Zheke)
-results/          merged CSV files and figures (raw logs are not committed)
-report/           report sources and AI-usage log
+results/          audited CSV files, report tables and figures (raw logs are not committed)
+report/           final report (report.pdf), its LaTeX source and table generator, working notes
 ```
 
 ## Requirements
@@ -48,9 +51,12 @@ report/           report sources and AI-usage log
 ## Build
 
 ```bash
-scripts/build.sh            # serial + MPI + MPI/OpenMP, runs tests
-scripts/build.sh cuda       # also MPI/CUDA
+scripts/build.sh                          # serial + MPI + MPI/OpenMP, then runs the tests
+PCG_CUDA_ARCH=86 scripts/build.sh cuda    # also MPI/CUDA (86 = compute capability of an A40)
 ```
+
+`PCG_CUDA_ARCH` must be the compute capability of the GPU you run on
+(`nvidia-smi --query-gpu=compute_cap --format=csv,noheader`, without the dot).
 
 or manually:
 
@@ -69,16 +75,14 @@ Login nodes are virtual machines, so compile on a compute node:
 ```bash
 qsub -I -l select=1:ncpus=4 -l walltime=00:20:00
 cd $PBS_O_WORKDIR
-source scripts/vanda/env.sh
-scripts/build.sh cuda
+source scripts/vanda/env.sh               # CMake + NVIDIA HPC SDK 26.1 / HPC-X (Open MPI 4.1)
+scripts/build.sh                          # CPU executables
 ```
 
-### On Atlas
-
-```bash
-source scripts/atlas/env.sh
-scripts/build.sh
-```
+Build the CUDA executable on a GPU node (`batch_gpu` queue) with
+`PCG_CUDA_ARCH=86 scripts/build.sh cuda`. On Vanda, inter-node CPU communication was run over
+Open MPI's TCP transport (`--mca pml ob1 --mca btl self,vader,tcp`, HCOLL/UCC disabled); see
+[scripts/vanda/STEP3.md](scripts/vanda/STEP3.md) for the exact launch settings and rank pinning.
 
 ## Run
 
@@ -103,8 +107,14 @@ Examples:
 build/bin/poisson_serial --dim 2 --n 512
 mpirun -np 16 build/bin/poisson_mpi --dim 3 --n 256 --decomp cart --halo overlap
 OMP_NUM_THREADS=18 mpirun -np 4 build/bin/poisson_omp --dim 3 --n 256
-mpirun -np 2 build/bin/poisson_cuda --dim 3 --n 512
+PCG_CUDA_HALO=staged mpirun -np 2 build/bin/poisson_cuda --dim 3 --n 256   # one GPU per rank
 ```
+
+For hybrid runs, give each rank its own set of cores (Open MPI: `--map-by ppr:R:node:PE=T`, or
+`--bind-to none` with `OMP_PLACES=cores OMP_PROC_BIND=close`); the default `--bind-to core` puts
+all threads of a rank on one core. For `poisson_cuda`, `PCG_CUDA_HALO=staged|device` selects
+whether halo faces are copied to host memory before MPI or passed as device pointers
+(CUDA-aware MPI).
 
 ## Output format
 
@@ -119,7 +129,9 @@ Times are in seconds, cover the solve only (not setup or I/O), and are the maxim
 and global-reduction phase maxima. These maxima can come from different ranks
 and overlap; they are not additive parts of the total.
 
-## Reproducing the experiments
+## Reproducing the experiments and the report
+
+All results in the report come from the audited CSV files committed under `results/`.
 
 ```bash
 qsub -P YOUR_PROJECT scripts/vanda/scaling_cpu.pbs # serial, strong/weak, MPI choices, hybrid; up to 288 cores
@@ -147,6 +159,13 @@ data selection. Outputs include 95 selected groups / 285 samples,
 and [the results discussion](report/analysis_step4.md). Both weak curves reach
 256 cores; GPU comparisons cover one/two A40 GPUs and staged/device transports. No raw log is needed to reproduce these artifacts.
 
+Rebuild the report tables and PDF:
+
+```bash
+python3 report/make_tables.py             # results/*.csv -> report/generated/*.tex
+cd report && latexmk -pdf report.tex      # -> report/report.pdf
+```
+
 ## Validation
 
 `ctest --test-dir build --output-on-failure` runs:
@@ -156,6 +175,13 @@ and [the results discussion](report/analysis_step4.md). Both weak curves reach
 | `common` | CLI parser, CSV format, manufactured solution |
 | `serial` | A is symmetric positive definite; err_l2 falls as O(h²) (observed order 2.00 in 2D and 3D); standard and single-reduction CG give the same iterations and error |
 | `mpi_np1`, `mpi_np3`, `mpi_np4` | every `--decomp` × `--halo` × `--cg` combination, 2D and 3D, uneven splits and one-point-thick blocks: same iteration count as serial (±1), same err_l2 (1e-6 relative), and every grid point equal to the serial solution (max-norm, 1e-8 relative) |
+| `omp_np1`, `omp_np2` | the same checks for the MPI+OpenMP solver with 2 threads per rank |
+
+The CUDA kernels (stencil, dot product, halo-face packing) are checked against CPU results by
+`src/hybrid_cuda/checks/kernel_check.cu`
+(`nvcc -std=c++17 -arch=sm_86 src/hybrid_cuda/checks/kernel_check.cu -o kernel_check && ./kernel_check`);
+`cluster_gpu_smoke` (`scripts/build.sh smoke-cuda`) tests device-pointer MPI between two hosts. On the cluster, every timed run was additionally required to match a serial run on the
+same mesh in iteration count and error (`scripts/audit_scaling.py`).
 
 The MPI test can be run on any number of ranks: `mpirun -np 8 build/bin/test_mpi`.
 With Open MPI on a machine with fewer cores than ranks, configure with
@@ -164,6 +190,7 @@ With Open MPI on a machine with fewer cores than ranks, configure with
 Every run also reports `rel_res`, the true residual ‖b − A x‖/‖b‖ recomputed after the solve,
 and `err_l2`, the discrete L2 error √(h^d Σ (x − u)²) against the manufactured solution.
 
-## AI usage
+## Use of AI
 
-See `report/ai_usage.md`.
+Generative AI tools (Anthropic Claude and OpenAI Codex) assisted in drafting code, tests, job
+scripts and the report; all output was reviewed, tested and validated by the authors.

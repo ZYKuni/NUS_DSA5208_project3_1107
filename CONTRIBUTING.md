@@ -63,6 +63,6 @@ CG 算法只在 `src/common/cg.cpp` 写一次，各版本只实现一个 `pcg::B
 - MPI 必须测到 ≥ 256 核：Vanda 4 节点 × 72 核 = 288 核。strong 和 weak 都要做。
 - 结果 CSV 放 `results/`，文件名 `<实验>_<impl>_<dim>d.csv`，由 `analysis/collect.py` 合并。
 
-## AI 使用记录
+## AI 使用声明
 
-每人在 `report/ai_usage.md` 自己那一节记录：用了什么工具、做了什么、哪些代码或文字来自 AI、自己如何检查。报告最后一节由此汇总。
+最终报告末尾以一句话声明 AI 工具的使用（见 `report/report.tex` 的 “Use of AI” 段）；不再单独维护使用日志。
