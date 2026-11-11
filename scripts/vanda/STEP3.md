@@ -36,6 +36,12 @@ must match a same-mesh serial reference in iteration count (within one) and
 discrete L2 error (relative tolerance 1e-6). A process exit code alone is
 insufficient. Warmups also undergo these checks.
 
+For CUDA, `--tol 1e-8` retains the executable's strict true-residual acceptance
+check, while `PCG_CUDA_STOP_TOL=5e-9` controls the recursive stopping target.
+The launcher exports that variable to every rank. Without this distinction,
+a correctly computed true residual between 5e-9 and 1e-8 made the executable
+exit nonzero even though it met the experiment's accuracy criterion.
+
 ## CPU matrix
 
 | Experiment | Settings |
@@ -109,7 +115,11 @@ n=203. The driver now derives the reference sizes from that same formula.
 The 276 completed samples were audited individually; this is explicitly a
 partial-suite export, not a successful-job declaration.
 
-After PBS accepts submissions again, run from the tested source root:
+The repair was completed by job `1540132.stdct-mgmt-02` on November 11:
+ten groups / 30 samples, exit zero. Numerical source and CPU binary hashes
+match the original job. The independently audited exports are `cpu_weak3d_*`.
+
+To reproduce the repair and GPU suite, run from the tested source root:
 
 ```bash
 qsub -P YOUR_PROJECT -l walltime=00:30:00 -v SUITE=weak3d scripts/vanda/scaling_cpu.pbs
@@ -123,6 +133,15 @@ and unused serial n=202 group with the new five weak groups and serial n=203
 group. Keep the other four new serial groups as supporting validation evidence.
 This yields 93 groups / 279 samples without mixing allocations within a weak
 curve or duplicating reference groups.
+
+Reproduce the assembled CPU export with its source-job provenance:
+
+```bash
+python3 scripts/combine_cpu_scaling.py \
+  --main results/benchmarks/step3/cpu_main \
+  --repair results/benchmarks/step3/cpu_weak3d \
+  --output results/benchmarks/step3/cpu_combined
+```
 
 Audit each successful supplement against its own archived source snapshot:
 

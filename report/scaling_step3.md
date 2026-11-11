@@ -1,11 +1,10 @@
 # Task 3: scaling measurements and completion status
 
-**Status, 9 November 2026:** the requested CPU extension is measured through
-256 and 288 physical cores. Task 3 as a whole remains incomplete: the 3D weak
-curve needs its 256-rank point and the GPU suite has no accepted measurements.
-On November 9 at 13:48 Singapore, Vanda's login node was accessible, but both
-`qstat -Bf stdct-mgmt-02` and direct `qsub` returned connection refused
-(`errno=15010`). The prepared repair submission did not receive a job ID.
+**Status, 11 November 2026:** the CPU matrix is complete, with strong scaling
+through 288 cores and weak scaling through 256 cores in both dimensions.
+GPU retry `1540688.stdct-mgmt-02` is pending acceptance. Earlier submission
+attempts were refused on November 9; an explicit urgent-maintenance notice
+appeared on November 10. Login and PBS scheduling recovered on November 11.
 
 ## Accepted CPU evidence
 
@@ -45,6 +44,37 @@ relative residual below 1e-8 (maximum **5.597143e-9**). Parallel iteration count
 agree with a same-mesh serial reference within one; discrete L2 error agrees
 within relative tolerance 1e-6. Source hashes match the frozen run snapshot.
 
+## Completed 3D weak-scaling repair
+
+Job `1540132.stdct-mgmt-02` ran on November 11, 14:13–14:22 Singapore,
+on CN-133, CN-136, CN-137 and CN-139 (four exclusive 72-core Xeon Platinum
+8452Y hosts). PBS exit status is **0** and all ten groups / 30 samples passed
+the independent audit. Maximum true relative residual is 4.976624e-9; rank
+placement and serial comparisons passed. Numerical source and serial/MPI/OpenMP
+binary hashes are identical to the first CPU run.
+
+The entire 3D weak curve comes from this single replacement allocation:
+
+| MPI cores | n | CG iterations | Minimum (s) | Median (s) |
+| --- | ---: | ---: | ---: | ---: |
+| 1 | 32 | 119 | 0.007251792 | 0.007360886 |
+| 8 | 64 | 241 | 0.03774247 | 0.03791845 |
+| 64 | 128 | 485 | 0.09329851 | 0.09382242 |
+| 216 | 192 | 734 | 0.4915792 | 0.5122607 |
+| 256 | 203 | 775 | 0.4645508 | 0.5308163 |
+
+The 256-core point uses 32677.449 unknowns/core, 0.276% below the base load
+because of integer mesh rounding. Its CV is 12.60%; the lower minimum at
+256 than at 216 cores does not establish a robust improvement, since the
+median ordering is reversed.
+
+`cpu_combined_*` assembles **93 CPU groups / 279 samples**, retaining eight
+preflight groups as validation evidence. It replaces the original four 3D
+weak groups and unused serial n=202 group, and keeps the new n=203 reference.
+The repair's other four serial references remain in its original export.
+The assembly manifest preserves the first job's actual exit status 1 and
+does not invent a successful single PBS run.
+
 ## Selected strong-scaling measurements
 
 These figures use Cartesian decomposition, blocking halos and standard CG.
@@ -79,17 +109,24 @@ written and validated. An explicit partial-audit mode preserves those groups
 without declaring the whole job successful.
 
 The corrected driver derives serial sizes from the weak-scaling formula.
-Its `weak3d` suite runs serial references and all five 3D weak points in one
-new allocation. At 256 ranks, n=203 gives 32677.449 points/core, 0.276% below
-the nominal 32768; report this rounding. Whole-solve weak-scaling time also
-includes increasing CG iteration counts, so retain seconds/iteration too.
+The successful `weak3d` repair above supplies all five points and their serial
+references. Whole-solve weak-scaling time includes increasing CG iteration
+counts, so the analysis retains seconds/iteration too.
 
-The latest GPU attempt, `1533509.stdct-mgmt-02`, exited 1 at the mandatory
+An earlier GPU attempt, `1533509.stdct-mgmt-02`, exited 1 at the mandatory
 two-rank device-pointer smoke test. Its records showed the remote rank lacked
 `PCG_SMOKE_DEVICE_MPI` and followed a different collective path. Explicit
 `mpiexec -x` exports for that flag, visible-GPU checks, and halo transport are
-now added, but await execution. Earlier link/remote-launch/UCX failures and
+now added and passed execution in job `1540133.stdct-mgmt-02`. Earlier link/remote-launch/UCX failures and
 cancelled attempts remain raw evidence; none count as runtime results.
+That job also passed B's expanded GPU stencil, dot and halo-face checks and
+all ten small-mesh preflight groups. It then exited at the 2D n=2048 warmup:
+the recomputed true residual was 5.582144e-9, below the experiment's 1e-8
+accuracy threshold but above the executable's then-configured 5e-9 threshold.
+The fix preserves strict true-residual exit validation with `--tol 1e-8` and
+sets the recursive target separately with `PCG_CUDA_STOP_TOL=5e-9` on every
+rank. Serial references still stop at 5e-9. Retry `1540688` reruns the full
+GPU suite; the failed warmup is not an accepted runtime sample.
 The GPU plan is 1/2 GPUs on different hosts, staged/device-pointer modes,
 with preflight serial comparisons before timings. The inspected queue allowed
 at most two GPUs per job. Device-pointer MPI on the selected UCX TCP path
@@ -102,7 +139,8 @@ The accepted CSVs, original manifest, audit and archive hashes are in
 The original archive and frozen source/logs are preserved locally and on
 Vanda, outside Git. Reproduction and the exact supplement commands are in
 [`scripts/vanda/STEP3.md`](../scripts/vanda/STEP3.md#current-dataset-and-recovery).
-After PBS recovers, submit the CPU supplement and GPU suite, archive their
-final scheduler records, and audit both before claiming task 3 complete.
+The CPU supplement's archive, final scheduler record and successful audit are
+preserved. The GPU retry still needs a complete successful audit before task 3
+can be declared complete.
 Task 4's collector and CPU figures are now available in
 [`analysis_step4.md`](analysis_step4.md), with these measurement gaps retained.

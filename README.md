@@ -115,8 +115,9 @@ impl,dim,n,ranks,threads,gpus,decomp,halo,cg,iters,t_total,t_stencil,t_halo,t_re
 ```
 
 Times are in seconds, cover the solve only (not setup or I/O), and are the maximum over ranks.
-`t_stencil`, `t_halo` and `t_reduce` split each run into computation, neighbour communication
-and global reductions.
+`t_stencil`, `t_halo` and `t_reduce` report computation, neighbour communication
+and global-reduction phase maxima. These maxima can come from different ranks
+and overlap; they are not additive parts of the total.
 
 ## Reproducing the experiments
 
@@ -129,7 +130,8 @@ See [the task 3 run guide](scripts/vanda/STEP3.md) for exact meshes, timing,
 placement, queue limits and evidence requirements. The original individual PBS
 files are uncalibrated templates.
 The [task 3 status](report/scaling_step3.md) records the validated 288-core CPU
-results and the outstanding 3D weak/GPU runs; the suite is not yet complete.
+results, the completed 3D weak repair through 256 cores, and the GPU retry
+awaiting a successful audit. The CPU matrix is complete.
 
 Reproduce the task 4 analysis from the committed audited CPU exports:
 
@@ -140,11 +142,11 @@ python3 analysis/plots.py
 ```
 
 The [analysis guide](analysis/README.md) defines the baselines and explicit
-data selection. Outputs include 84 performance groups / 252 samples,
+data selection. Outputs include 85 CPU performance groups / 255 samples,
 [report tables](results/tables/README.md), [12 figures and a PDF book](results/figures/README.md),
-and [the results discussion](report/analysis_step4.md). The missing 3D weak
-endpoint and unavailable GPU measurements remain marked; no raw log is needed
-to reproduce these CPU artifacts.
+and [the results discussion](report/analysis_step4.md). The full 3D weak curve is measured through 256 cores. GPU measurements await
+a successful full-suite audit; no raw log is needed to reproduce these CPU
+artifacts.
 
 ## Validation
 

@@ -7,6 +7,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import re
 import shutil
 import statistics
 
@@ -90,7 +91,18 @@ def main():
                 assert any(r['experiment']=='strong' and int(r['dim'])==dim and int(r['ranks'])==288 for r in rows)
     else:
         assert 'GPU_ALLOCATION_DEVICE_MPI=PASS' in log
-        assert 'GPU_SMOKE=PASS' in (d/'gpu-allocation-probe.log').read_text()
+        probe=(d/'gpu-allocation-probe.log').read_text()
+        assert 'GPU_SMOKE=PASS' in probe
+        assert set(re.findall(r'rank=([01]) visible_gpus=1 .*device_mpi=1',probe))=={'0','1'}
+        assert '2D and 3D GPU stencil and dot checks passed' in log
+        if 'verify_faces' in (root/'src/hybrid_cuda/checks/kernel_check.cu').read_text():
+            assert 'GPU halo face packing and unpacking checks passed' in log
+        if 'PCG_CUDA_STOP_TOL' in (root/'scripts/run_gpu_scaling.py').read_text():
+            assert meta['cuda_cli_true_tolerance']==1e-8 and meta['cuda_recursive_stop_tolerance']==5e-9
+            for r in rows:
+                command=json.loads((d/(r['group']+'-r'+r['repeat']+'.command.json')).read_text())
+                assert command[command.index('--tol')+1]==('1e-8' if r['impl']=='cuda' else '5e-9')
+                assert any(command[i:i+2]==['-x','PCG_CUDA_STOP_TOL'] for i in range(len(command)-1))
         for dim in [2,3]:
             for mode in ['staged','device']:
                 assert any(r['experiment']=='strong' and int(r['dim'])==dim and r['transport']==mode

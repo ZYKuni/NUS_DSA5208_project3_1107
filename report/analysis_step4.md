@@ -1,19 +1,21 @@
 # Task 4: CPU result analysis and report figures
 
-Task 4 is complete for the accepted CPU dataset: reproducible collection,
-derived metrics, report tables and 12 inspected figures. **Task 3 remains
-partial**: 3D weak scaling lacks the 256-rank point and GPU measurements have
-not passed acceptance. The plots preserve those gaps.
+Task 4 is updated for the completed CPU matrix: reproducible collection,
+derived metrics and report tables. The full 3D weak curve now reaches 256
+cores. GPU measurements are pending the complete audit of retry `1540688`.
 
 ## Dataset and measurement conventions
 
-The source is the independently audited, completed portion of Vanda job
-`1533443.stdct-mgmt-02` (actual exit status 1, missing-reference failure).
-Of 92 groups / 276 samples, eight preflight groups / 24 samples are excluded
-from performance analysis. The remaining **84 groups / 252 samples** comprise
-11 serial, 40 strong, nine weak, 12 MPI-choice and 12 hybrid configurations.
+The sources are the independently audited completed portion of Vanda job
+`1533443.stdct-mgmt-02` (actual exit status 1, missing-reference failure),
+and successful CPU repair `1540132.stdct-mgmt-02` (exit zero). The assembly
+replaces the entire original 3D weak curve and unused n=202 reference, and
+retains duplicate repair references in the original export only. Of the
+assembled 93 CPU groups / 279 samples, eight preflight groups / 24 samples
+are excluded from performance analysis. The remaining **85 groups / 255 samples** comprise
+11 serial, 40 strong, ten weak, 12 MPI-choice and 12 hybrid configurations.
 There is one excluded warmup and three separate measured processes per group.
-All 252 retained samples pass true residual <1e-8 and the same-mesh serial
+All 255 retained CPU samples pass true residual <1e-8 and the same-mesh serial
 iteration/error checks. Failed/cancelled jobs and raw logs are not inputs.
 
 Timings cover the CG loop, including the end barrier, excluding setup,
@@ -42,8 +44,10 @@ Adjacent-mesh discrete L2 error orders are approximately 2.00 in both
 dimensions, consistent with second-order spatial accuracy. The h-squared
 reference lines are anchored at the coarsest mesh rather than fitted to the
 measurements. This discretization check complements the independent true
-residual and serial/parallel agreement checks. The valid serial n=202 point is
-retained, although it did not supply the missing n=203 weak reference.
+residual and serial/parallel agreement checks. The serial n=203 reference is
+from the repair allocation; other serial curve points come from the original
+allocation. Both use identical numerical source and CPU binary hashes. The
+unused n=202 reference remains in the original export, outside this assembly.
 
 ## Strong scaling and decomposition
 
@@ -84,13 +88,14 @@ establish a statistically reliable 256-to-288-core improvement.
 
 Figures 7 and 8 show two different quantities: whole-solve time and average
 time per CG iteration. The measured meshes keep owned unknowns/core exactly
-constant at 16384 in 2D and 32768 in 3D. Increasing n nevertheless increases
+constant at 16384 in 2D. In 3D the base is 32768, with the rounded n=203
+endpoint giving 32677.449 (-0.276%). Increasing n nevertheless increases
 the number of unpreconditioned CG iterations.
 
 | Dimension | Endpoint | Iterations at 1 / endpoint cores | Min endpoint (s) | Whole-solve T(1)/T(P) | Per-iteration cost ratio |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | 2D | 256 cores | 392 / 6512 | 2.126299 | 0.435% | 7.22% |
-| 3D | 216 cores | 119 / 734 | 0.516117 | 1.398% | 8.62% |
+| 3D | 256 cores | 119 / 775 | 0.464551 | 1.561% | 10.17% |
 
 Even after normalising by iterations, the average iteration cost grows
 substantially. Thus convergence growth alone does not explain the loss of
@@ -99,10 +104,12 @@ the larger configurations, but they cannot isolate network latency from all
 other effects. In 2D at 256 cores, median runtime is 4.090440 s and CV is
 27.30%, so the minimum-time ratio is an optimistic observed statistic.
 
-The 3D curve **stops at 216 cores**. The planned 256-core point is shown as
-missing; no endpoint, trend fit or interpolation substitutes for it. Its
-planned n=203 would slightly change points/core, but that mesh is not present
-in the measured weak curve.
+The complete 3D curve uses only the repair allocation, including its one-core
+MPI baseline. At 256 cores, median runtime is 0.530816 s and CV is 12.60%.
+Its minimum is lower than the 216-core minimum (0.491579 s), but the median
+ordering is reversed (216-core median 0.512261 s). This is not evidence of a
+robust endpoint improvement. The slight points/core rounding is retained in
+the tables rather than treating the 3D curve as exact constant work per core.
 
 ## Halo and CG choices
 
@@ -147,13 +154,14 @@ an OpenMP speedup curve or a claim that all OpenMP workloads scale poorly.
 [`analysis/README.md`](../analysis/README.md) gives the complete commands,
 input-selection rules and metric definitions. Machine-readable report tables
 are under [`results/tables`](../results/tables/README.md). All figures are in
-the [figure index and book](../results/figures/README.md). Twelve regression
+the [figure index and book](../results/figures/README.md). Sixteen regression
 tests check baseline isolation, matching minima, missing repeats, altered
-exports, convergence rejection, fixed-core arithmetic and missing endpoints.
+exports, convergence rejection, fixed-core arithmetic, GPU transport baselines
+and the assembled CPU selection.
 
 Phase maxima may occur on different ranks; their intervals can overlap. Their
 sum/total diagnostic ranges up to about 1.59 in this dataset. Stacking those
 values or labelling their sum a communication fraction would be misleading.
 No failed GPU attempt is a runtime result, and no CPU/GPU speedup is claimed.
-The report should use these measured CPU results and explicitly retain the
-missing 3D endpoint/GPU limitations until task 3 supplements pass acceptance.
+The GPU retry still needs a successful full audit before those results can
+be incorporated.

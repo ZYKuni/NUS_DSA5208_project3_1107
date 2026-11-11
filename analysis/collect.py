@@ -51,6 +51,7 @@ def read_input(results, spec):
                 and audit["scope"] == "completed groups only", "unapproved partial suite")
     samples = pd.read_csv(paths["samples.csv"], keep_default_na=False)
     exported = pd.read_csv(paths["summary.csv"], keep_default_na=False)
+    labels = LABELS + (["transport"] if "transport" in samples.columns else [])
     require(set(LABELS + VALUES + INTEGERS).issubset(samples.columns), "missing sample fields")
     for k in INTEGERS:
         samples[k] = pd.to_numeric(samples[k], errors="raise")
@@ -69,12 +70,12 @@ def read_input(results, spec):
     summaries = []
     for group, g in samples.groupby("group", sort=True):
         require(sorted(g["repeat"].tolist()) == [0, 1, 2], f"missing/duplicate repeat: {group}")
-        require(all(g[k].nunique() == 1 for k in LABELS), f"mixed configuration: {group}")
+        require(all(g[k].nunique() == 1 for k in labels), f"mixed configuration: {group}")
         best = g.loc[g["t_total"].idxmin()]
         old = exported[exported["group"] == group]
         require(len(old) == 1, f"missing summary: {group}")
         old = old.iloc[0]
-        for k in LABELS + ["repeat", "iters"]:
+        for k in labels + ["repeat", "iters"]:
             require(old[k] == best[k], f"summary label/minimum mismatch: {group}/{k}")
         for k in VALUES:
             require(math.isclose(float(old[k]), float(best[k]), rel_tol=1e-12, abs_tol=1e-15),
@@ -103,10 +104,16 @@ def read_input(results, spec):
         require(abs(row.iters-ref.iters) <= 1
                 and math.isclose(row.err_l2, ref.err_l2, rel_tol=1e-6), "serial comparison failed")
     cpu = samples["gpus"] == 0
-    require("physical_cores" in samples.columns or not cpu.any(), "missing CPU placement count")
-    if cpu.any():
+    require("physical_cores" in samples.columns or not samples["impl"].isin(["mpi", "omp"]).any(),
+            "missing CPU placement count")
+    if "physical_cores" in samples.columns:
         require((samples.loc[cpu, "physical_cores"] ==
                  samples.loc[cpu, "ranks"] * samples.loc[cpu, "threads"]).all(), "CPU count mismatch")
+    gpu = samples["impl"] == "cuda"
+    if gpu.any():
+        require("transport" in samples.columns and samples.loc[gpu, "transport"].isin(["staged", "device"]).all(),
+                "missing/invalid GPU transport")
+        require((samples.loc[gpu, "ranks"] == samples.loc[gpu, "gpus"]).all(), "GPU/rank mismatch")
     samples["source"] = spec["prefix"]
     return pd.DataFrame(summaries), samples, audit
 
@@ -148,6 +155,15 @@ def derive(frame):
             ratio(row, base, "speedup")
             for suffix in ["", "_median", "_low", "_high"]:
                 row["efficiency" + suffix] = row["speedup" + suffix]/row["cores"]
+        elif row["experiment"] == "strong" and row["impl"] == "cuda":
+            base = one(frame, **common, experiment="strong", n=row["n"], gpus=1,
+                       transport=row["transport"])
+            ratio(row, base, "gpu_speedup")
+            for suffix in ["", "_median", "_low", "_high"]:
+                row["gpu_efficiency" + suffix] = row["gpu_speedup" + suffix]/row["gpus"]
+            staged = one(frame, **common, experiment="strong", n=row["n"], gpus=row["gpus"],
+                         transport="staged")
+            ratio(row, staged, "staged_over_transport")
         elif row["experiment"] == "weak":
             base = one(frame, **common, experiment="weak", ranks=1)
             ratio(row, base, "weak_solve_ratio")
@@ -177,9 +193,15 @@ def coverage(df):
             rows.append(dict(experiment=experiment, dim=dim, decomp=dec,
                              observed_ranks=[int(x) for x in observed], missing_ranks=missing,
                              complete=not missing))
-    return dict(cpu_series=rows, accepted_gpu_groups=int((df["impl"] == "cuda").sum()),
-                gpu_status="unavailable" if not (df["impl"] == "cuda").any() else "see GPU audit",
-                task3_complete=all(r["complete"] for r in rows) and bool((df["impl"] == "cuda").any()))
+    gpu = df[(df["impl"] == "cuda") & (df["experiment"] == "strong")]
+    expected = {(d, n, t, g) for d,n in [(2,2048),(3,256)]
+                for t in ["staged", "device"] for g in [1, 2]}
+    observed = set(zip(gpu["dim"], gpu["n"], gpu.get("transport", []), gpu["gpus"]))
+    missing_gpu = sorted(expected-observed)
+    return dict(cpu_series=rows, accepted_gpu_groups=len(gpu),
+                missing_gpu_configurations=[dict(dim=d, n=n, transport=t, gpus=g) for d,n,t,g in missing_gpu],
+                gpu_status="unavailable" if gpu.empty else "partial" if missing_gpu else "complete",
+                task3_complete=all(r["complete"] for r in rows) and not missing_gpu)
 
 
 def collect(results, config_path):
@@ -213,7 +235,8 @@ def collect(results, config_path):
         g.to_csv(path, index=False, float_format="%.12g")
         outputs.append(path)
     exports = {
-        "strong_endpoints": df[(df["experiment"] == "strong") & df["ranks"].isin([1, 64, 256, 288])],
+        "strong_endpoints": df[(df["experiment"] == "strong") & (df["impl"] == "mpi")
+                               & df["ranks"].isin([1, 64, 256, 288])],
         "weak_scaling": df[df["experiment"] == "weak"],
         "hybrid_comparison": df[df["experiment"] == "hybrid"],
         "variant_comparison": df[(df["experiment"] == "variants") |
@@ -221,6 +244,9 @@ def collect(results, config_path):
                                   & df["ranks"].isin([64, 256]))],
         "serial_scaling": df[df["experiment"] == "serial"],
     }
+    gpu = df[(df["experiment"] == "strong") & (df["impl"] == "cuda")]
+    if not gpu.empty:
+        exports["gpu_scaling"] = gpu
     for name, g in exports.items():
         path = tables/(name+".csv")
         g.to_csv(path, index=False, float_format="%.12g")

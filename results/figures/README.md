@@ -14,7 +14,7 @@ analysis input hashes and plotting-library versions.
 | 5 | [3D strong scaling](strong_3d_n288.pdf) | n=288; time, speedup and efficiency through 288 cores |
 | 6 | [3D phases](phases_3d_n288.pdf) | Separate stencil, halo and reduction maxima |
 | 7 | [2D weak scaling](weak_2d.pdf) | Whole-solve and per-iteration time; ratios; iterations |
-| 8 | [3D weak scaling](weak_3d.pdf) | Ends at 216 cores; missing 256-core point marked |
+| 8 | [3D weak scaling](weak_3d.pdf) | Full replacement curve through 256 physical cores |
 | 9 | [2D MPI choices](variants_2d_n2048.pdf) | Blocking/overlap and standard/single-reduction CG |
 | 10 | [3D MPI choices](variants_3d_n288.pdf) | Same four choices at 64 and 256 cores |
 | 11 | [2D hybrid](hybrid_2d_n2048.pdf) | Six MPI/OpenMP splits of fixed 288 physical cores |
@@ -27,7 +27,7 @@ baselines described in [the analysis guide](../../analysis/README.md).
 Ranges are not confidence intervals. Time, size and CPU count axes are
 logarithmic; ratio y axes are linear and superlinear values are not clipped.
 
-These figures use 84 groups / 252 samples after excluding eight preflight
+These figures use 85 groups / 255 samples after excluding eight preflight
 groups. **No GPU performance figure is available.** No absent measurement is
 interpolated. See [the discussion](../../report/analysis_step4.md) for limits,
-the meaning of weak-scaling ratios and the incomplete task 3 status.
+the meaning of weak-scaling ratios and the GPU retry status.

@@ -26,6 +26,7 @@ def main():
     assert len(hosts) == 2
     meta = dict(job_id=os.environ['PBS_JOBID'],hosts=hosts, gpus_per_host=1,
                 stopping_tolerance=5e-9, acceptance_true_residual=1e-8,
+                cuda_cli_true_tolerance=1e-8, cuda_recursive_stop_tolerance=5e-9,
                 repeats=3,warmups=1,selection='minimum entire row; retain all samples',
                 timing='CG loop only, exclude setup and validation; end barrier included',
                 binary_hashes={k:hashlib.sha256((a.bin_dir/('poisson_'+k)).read_bytes()).hexdigest()
@@ -64,18 +65,19 @@ def main():
             command=['mpiexec','--mca','coll_hcoll_enable','0','--mca','coll_ucc_enable','0',
                      '--mca','plm_rsh_agent',str(root/'scripts/vanda/pbs_rsh.py'),
                      '--mca','pml','ucx','--mca','pml_ucx_tls','any',
-                     '-x','PCG_CUDA_HALO',
+                     '-x','PCG_CUDA_HALO','-x','PCG_CUDA_STOP_TOL',
                      '-x','UCX_TLS','-x','UCX_NET_DEVICES','--hostfile',str(hf.resolve()),'-n',str(g),
                      '--map-by',f'ppr:{g//nodes}:node','--bind-to','none',
                      'python3',str(root/'scripts/vanda/pin_rank.py'),'--threads','1',
                      '--record-dir',str((a.output/'placement'/rid).resolve()),
                      str(a.bin_dir/('poisson_'+impl)), '--dim',str(dim),'--n',str(n),
-                     '--tol','5e-9','--maxit','20000','--repeat','1','--decomp','cart',
+                     '--tol','1e-8' if impl=='cuda' else '5e-9',
+                     '--maxit','20000','--repeat','1','--decomp','cart',
                      '--halo','block','--cg','std','--csv',str(dest.with_suffix('.csv').resolve())]
             dest.with_suffix('.command.json').write_text(json.dumps(command)+'\n')
             with dest.with_suffix('.stdout.log').open('w') as out,dest.with_suffix('.stderr.log').open('w') as err:
                 env=dict(os.environ,PCG_CUDA_HALO=mode,UCX_TLS='tcp,sm,self,cuda_copy,cuda_ipc',
-                         UCX_NET_DEVICES='all')
+                         UCX_NET_DEVICES='all',PCG_CUDA_STOP_TOL='5e-9')
                 subprocess.run(command,env=env,
                                stdout=out,stderr=err,check=True,timeout=900)
             row,=csv.DictReader(dest.with_suffix('.csv').open())

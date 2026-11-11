@@ -10,7 +10,7 @@ are in `../analysis_samples.csv`; input hashes and exclusions are in
 | --- | ---: | --- |
 | `serial_scaling.csv` | 11 | Serial size sweep, iteration growth and discretization error |
 | `strong_endpoints.csv` | 16 | Both dimensions/decompositions at 1,64,256,288 cores |
-| `weak_scaling.csv` | 9 | Five 2D and four 3D weak points; no 3D 256-core row |
+| `weak_scaling.csv` | 10 | Five points in each dimension, both through 256 physical cores |
 | `variant_comparison.csv` | 16 | Four halo/CG choices at 64/256 cores, both dimensions |
 | `hybrid_comparison.csv` | 12 | Six MPI/OpenMP splits at fixed 288 cores, both dimensions |
 

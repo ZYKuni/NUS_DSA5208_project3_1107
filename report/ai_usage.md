@@ -76,3 +76,18 @@ For each entry: date, tool, what it was used for, which files or text came from 
   every page of the exported PDF book for visual inspection. The text and
   figures describe observations and limitations; they do not invent missing
   GPU results or claim unmeasured causes of performance changes.
+
+- 2026-11-11, OpenAI Codex: completed and independently audited the full 3D
+  weak-scaling repair through 256 physical cores (job 1540132, exit zero,
+  10 groups / 30 samples). Compared numerical-source and CPU-binary hashes
+  against the main run, assembled 93 CPU groups / 279 samples without mixing
+  weak-curve allocations, and updated collection and figures to 85 CPU
+  performance groups / 255 samples. Sixteen analysis regression tests passed;
+  the updated weak-scaling PDF page was rendered and inspected. Integrated
+  B's expanded CUDA face checks, which passed on the first GPU attempt today.
+  Diagnosed that attempt's true/recursive residual threshold mismatch and
+  separated CUDA's optional recursive target (`PCG_CUDA_STOP_TOL=5e-9`) from
+  its unchanged true-residual acceptance (`--tol 1e-8`). Added independent
+  GPU transport/count baseline analysis and stricter GPU evidence auditing.
+  The full GPU retry 1540688 is still awaiting successful execution/audit;
+  its timings are not yet accepted or included in the figures.

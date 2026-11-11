@@ -1,7 +1,7 @@
 {
-  "dataset": "vanda-step3-audited-cpu",
-  "config_sha256": "3244a7bc9c8e4f63b26c0e4366ad9d9a3ab9530df9e9865ad9ef56d43ee370dd",
-  "collector_sha256": "978dba8d9f12b54e7cefd3242085138b62707490ceffec7c793ff1109994f5d3",
+  "dataset": "vanda-step3-audited-cpu-and-gpu",
+  "config_sha256": "b4ff3805961413a3821d4502d59565de4c363749ed763077840ba2042f7221c6",
+  "collector_sha256": "a643bee9f54e765ab37ec73ad819932be99c6ca830492cd860b7b6423b469d9d",
   "inputs": [
     {
       "prefix": "benchmarks/step3/cpu_main",
@@ -26,10 +26,34 @@
         "allocation": "4:ncpus=72:mpiprocs=72:ompthreads=1:mem=500GB:node_pool=cpu_node",
         "sample_sha256": "45f5619822183f9c46f2001d289265378d3f8434e649a42d236a735fecb3edd2"
       }
+    },
+    {
+      "prefix": "benchmarks/step3/cpu_weak3d",
+      "sha256": {
+        "samples.csv": "87e60b7ec3258365c2676ebbb25b4d5ccb130991056be095270320eb4d025f4e",
+        "summary.csv": "f19f7cca351df4401e530ede1cc2783910c53c5150599423d9aec6cb8ee95b1d",
+        "manifest.json": "21552b8872a594a8a912e7af8a77d1852cbbeae88641964a47f6f6ba65a5895f",
+        "audit.json": "c7f9c182a8f3c1acec5082df2506513d199ab32256a6710e50b792bcbbbd140f"
+      },
+      "audit": {
+        "job_id": "1540132.stdct-mgmt-02",
+        "exit_status": 0,
+        "groups": 10,
+        "samples": 30,
+        "scope": "complete suite",
+        "documented_missing_reference_failure": false,
+        "source_hashes_match": true,
+        "placement_verified": true,
+        "serial_comparisons_pass": true,
+        "max_true_rel_res": 4.976624e-09,
+        "exec_host": "CN-133/0*0+CN-136/0*0+CN-137/0*0+CN-139/0*0",
+        "allocation": "4:ncpus=72:mpiprocs=72:ompthreads=1:mem=64gb:node_pool=cpu_node",
+        "sample_sha256": "87e60b7ec3258365c2676ebbb25b4d5ccb130991056be095270320eb4d025f4e"
+      }
     }
   ],
-  "groups": 84,
-  "samples": 252,
+  "groups": 85,
+  "samples": 255,
   "excluded_groups": [
     {
       "job_id": "1533443.stdct-mgmt-02",
@@ -70,6 +94,51 @@
       "job_id": "1533443.stdct-mgmt-02",
       "group": "preflight-serial-3d-n15-p1-t1-cart-block-std",
       "reason": "preflight"
+    },
+    {
+      "job_id": "1533443.stdct-mgmt-02",
+      "group": "serial-serial-3d-n202-p1-t1-cart-block-std",
+      "reason": "explicit group exclusion"
+    },
+    {
+      "job_id": "1533443.stdct-mgmt-02",
+      "group": "weak-mpi-3d-n128-p64-t1-cart-block-std",
+      "reason": "explicit group exclusion"
+    },
+    {
+      "job_id": "1533443.stdct-mgmt-02",
+      "group": "weak-mpi-3d-n192-p216-t1-cart-block-std",
+      "reason": "explicit group exclusion"
+    },
+    {
+      "job_id": "1533443.stdct-mgmt-02",
+      "group": "weak-mpi-3d-n32-p1-t1-cart-block-std",
+      "reason": "explicit group exclusion"
+    },
+    {
+      "job_id": "1533443.stdct-mgmt-02",
+      "group": "weak-mpi-3d-n64-p8-t1-cart-block-std",
+      "reason": "explicit group exclusion"
+    },
+    {
+      "job_id": "1540132.stdct-mgmt-02",
+      "group": "serial-serial-3d-n128-p1-t1-cart-block-std",
+      "reason": "explicit group exclusion"
+    },
+    {
+      "job_id": "1540132.stdct-mgmt-02",
+      "group": "serial-serial-3d-n192-p1-t1-cart-block-std",
+      "reason": "explicit group exclusion"
+    },
+    {
+      "job_id": "1540132.stdct-mgmt-02",
+      "group": "serial-serial-3d-n32-p1-t1-cart-block-std",
+      "reason": "explicit group exclusion"
+    },
+    {
+      "job_id": "1540132.stdct-mgmt-02",
+      "group": "serial-serial-3d-n64-p1-t1-cart-block-std",
+      "reason": "explicit group exclusion"
     }
   ],
   "counts": {
@@ -77,7 +146,7 @@
     "hybrid": 12,
     "variants": 12,
     "serial": 11,
-    "weak": 9
+    "weak": 10
   },
   "coverage": {
     "cpu_series": [
@@ -179,36 +248,85 @@
           1,
           8,
           64,
-          216
-        ],
-        "missing_ranks": [
+          216,
           256
         ],
-        "complete": false
+        "missing_ranks": [],
+        "complete": true
       }
     ],
     "accepted_gpu_groups": 0,
+    "missing_gpu_configurations": [
+      {
+        "dim": 2,
+        "n": 2048,
+        "transport": "device",
+        "gpus": 1
+      },
+      {
+        "dim": 2,
+        "n": 2048,
+        "transport": "device",
+        "gpus": 2
+      },
+      {
+        "dim": 2,
+        "n": 2048,
+        "transport": "staged",
+        "gpus": 1
+      },
+      {
+        "dim": 2,
+        "n": 2048,
+        "transport": "staged",
+        "gpus": 2
+      },
+      {
+        "dim": 3,
+        "n": 256,
+        "transport": "device",
+        "gpus": 1
+      },
+      {
+        "dim": 3,
+        "n": 256,
+        "transport": "device",
+        "gpus": 2
+      },
+      {
+        "dim": 3,
+        "n": 256,
+        "transport": "staged",
+        "gpus": 1
+      },
+      {
+        "dim": 3,
+        "n": 256,
+        "transport": "staged",
+        "gpus": 2
+      }
+    ],
     "gpu_status": "unavailable",
     "task3_complete": false
   },
   "output_sha256": {
-    "all.csv": "b7c77199aef32fac16049d84427d89b4f2b01584c43505f4db590ed93d8cd024",
-    "analysis_samples.csv": "504dee6b396f5cb39b8cb9dc4ff270a546a2aeda793c18aae7ebb1e9929313fa",
+    "all.csv": "cde845bad7d77c8be4139f61a637435064deefa12267ba249d278ce06535921b",
+    "analysis_samples.csv": "e5af4a12b17257352d00f6e80ef99cce0dc8664866aa5a8fe2a1ffe75eb9b655",
     "hybrid_omp_2d.csv": "0863fbb7cd17e5383463594a6cef208ae718d1e71fd0f61dafc7a203a65fb4c0",
     "hybrid_omp_3d.csv": "a933c124b50a8b536e37b10d1576e438a81c651173b19203e63c613daa7a9869",
     "serial_serial_2d.csv": "c33626d9efe54836e2fddf9022fee6563b8c8ae8418c8d365c96f13bb48f202c",
-    "serial_serial_3d.csv": "db81bc2d839d419b43915577f511e83591e6d0e5b454233e15a0c2200800033d",
+    "serial_serial_3d.csv": "de740229d99c4fc283ef09f03d4898ec3fe48bd0700231db46316625e85f2606",
     "strong_mpi_2d.csv": "e32b3a56f04ddc50a007c7978b4fce4a9060da1da7bc049206ea0cce77ceb1c1",
     "strong_mpi_3d.csv": "d1b46065796a18b60095fc9d6d4bfb152307b450c66f44af8b24a169314646e2",
     "variants_mpi_2d.csv": "5deb57e986571c39472c9be42bc1575867897f82e9241d0995ba95e3ad4f347f",
     "variants_mpi_3d.csv": "565b3e86b3911b40c8a99efde52f66144313fc3944619f9690bbfde35b878ab7",
     "weak_mpi_2d.csv": "20418c12adb59c93e9c0833e161ffe6c9aea03fefcaea84a242406277323e8a6",
-    "weak_mpi_3d.csv": "fd3321dd109e0f4132679b832eac673a88e4badd5bee4b146c55371eda3b6f9e",
+    "weak_mpi_3d.csv": "9a2efccdb74315b55313cb475f005a470e26b952d056ba7f5178a37c18d84ed4",
     "tables/strong_endpoints.csv": "0cc58519a43de3f64e7c922ecb860e6d8be9c95b7b1efff93fb69bde72bbe7c5",
-    "tables/weak_scaling.csv": "2be039dff863a2a94f5fed2f5863d0cf4c14798ed186797d6f4f8727719effbd",
+    "tables/weak_scaling.csv": "cd8cb6ddbfecb409447ce9468ca19493ee634430974c391323e839f64b0fd9c7",
     "tables/hybrid_comparison.csv": "ab44a50f5b9ba61680db32d720a035ad835018721b23aafe82aab38f718ec9f7",
     "tables/variant_comparison.csv": "db663ce5576d0fd4386705fd911ae3cce463d6c27420cea274b26b6916ddfbb7",
-    "tables/serial_scaling.csv": "5cb7e089e5d194ce6a6f9bfc77d156901d6c678177a3fc33556261c725663f9c"
+    "tables/serial_scaling.csv": "fe5de8b25bef972d9f523497b792c4d12233b6011782c63650ee61348f74bb6d"
   },
   "versions": {
     "python": "3.12.11",

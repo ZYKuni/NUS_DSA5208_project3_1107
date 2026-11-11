@@ -1,6 +1,6 @@
 {
-  "status": "partial; task 3 incomplete",
-  "status_time": "2026-11-09T13:48:28+08:00",
+  "status": "CPU complete; GPU retry awaiting complete audit",
+  "status_time": "2026-11-11T14:55:41+08:00",
   "cpu_max_verified_physical_cores": 288,
   "cpu_main_job_id": "1533443.stdct-mgmt-02",
   "cpu_main_actual_exit_status": 1,
@@ -8,15 +8,8 @@
   "cpu_main_accepted_samples": 276,
   "gpu_accepted_samples": 0,
   "pending": [
-    "complete 3D weak curve including 256 ranks in a new allocation",
-    "run and audit GPU suite"
+    "run and audit complete GPU suite"
   ],
-  "submission_blocker": {
-    "qstat": "connection refused, errno=15010",
-    "qsub": "connection refused, errno=15010",
-    "server": "stdct-mgmt-02",
-    "repair_job_id": null
-  },
   "raw_evidence": {
     "archive": "step3-evidence-20261108.tar.gz",
     "archive_sha256": "e2b0ef1771f36c7e48dd98ea26b18e8181471fe705b40ee4eb28ae716a731c4d",
@@ -27,11 +20,44 @@
     "committed_to_git": false
   },
   "exports_sha256": {
+    "cpu_combined_manifest.json": "ef447937fe2c56e8990587b53721d0bf2f90b929cf11aa701feb5115ebd201a1",
+    "cpu_combined_samples.csv": "a37cfb1eb1b7073c3247e4d79c5be74969b2f44288ae206c2aedb9d6879a71ac",
+    "cpu_combined_summary.csv": "ac0b5a621d3f5324c9a20ad5efae0c84b5e8faaab89416dbeefea204ab615f13",
     "cpu_main_audit.json": "3a8bcd35849b8b3eb1c25a3c2d02c0d824c26c5a012a805db213032ba29f05ab",
     "cpu_main_manifest.json": "52682f426c39bf77e17740ff7ff44cba0caa424ba28c69f25fe95c41258ebfe4",
     "cpu_main_samples.csv": "45f5619822183f9c46f2001d289265378d3f8434e649a42d236a735fecb3edd2",
-    "cpu_main_summary.csv": "72c1f085f92dded1efb3fd82e71cd304174b7ffe0459b93d8b4980b9c45b855b"
+    "cpu_main_summary.csv": "72c1f085f92dded1efb3fd82e71cd304174b7ffe0459b93d8b4980b9c45b855b",
+    "cpu_weak3d_audit.json": "c7f9c182a8f3c1acec5082df2506513d199ab32256a6710e50b792bcbbbd140f",
+    "cpu_weak3d_manifest.json": "21552b8872a594a8a912e7af8a77d1852cbbeae88641964a47f6f6ba65a5895f",
+    "cpu_weak3d_samples.csv": "87e60b7ec3258365c2676ebbb25b4d5ccb130991056be095270320eb4d025f4e",
+    "cpu_weak3d_summary.csv": "f19f7cca351df4401e530ede1cc2783910c53c5150599423d9aec6cb8ee95b1d"
   },
   "reference_plan_fix": "3D weak mesh is 203 at 256 ranks; serial reference sizes now derived from the same formula",
-  "gpu_fix_validation": "explicit PCG_* MPI exports prepared; cluster execution pending"
+  "gpu_fix_validation": "Two-rank device-pointer smoke, expanded kernel/face checks and ten preflight groups passed in 1540133. True/recursive tolerance separation awaits full retry 1540688.",
+  "cpu_weak3d_job_id": "1540132.stdct-mgmt-02",
+  "cpu_weak3d_actual_exit_status": 0,
+  "cpu_combined_groups": 93,
+  "cpu_combined_samples": 279,
+  "cpu_performance_groups": 85,
+  "cpu_performance_samples": 255,
+  "gpu_retry_job_id": "1540688.stdct-mgmt-02",
+  "historical_submission_blocker": {
+    "qstat": "connection refused, errno=15010",
+    "qsub": "connection refused, errno=15010",
+    "server": "stdct-mgmt-02",
+    "repair_job_id": null
+  },
+  "additional_raw_evidence": [
+    {
+      "archive": "step3-repair-20261111.tar.gz",
+      "archive_sha256": "c7087a7412f92eafc7b3b0bc9fe9f5f60114845aa60b41f217d387c4dc554932",
+      "decompressed_tar_sha256": "4506942b634ac9bbab63e9a2c588a2f3fa84927ef039381ea244ad1e7f229612",
+      "local_extracted_directory": "results/raw/step3-vanda-repair-20261111",
+      "jobs": {
+        "1540132.stdct-mgmt-02": 0,
+        "1540133.stdct-mgmt-02": 1
+      },
+      "committed_to_git": false
+    }
+  ]
 }

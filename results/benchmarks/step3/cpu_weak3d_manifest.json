@@ -1,0 +1,48 @@
+{
+  "job_id": "1540132.stdct-mgmt-02",
+  "hosts": [
+    "cn-133.stdct.loc",
+    "cn-136.stdct.loc",
+    "cn-137.stdct.loc",
+    "cn-139.stdct.loc"
+  ],
+  "suite": "weak3d",
+  "timing": "CG loop only, initialisation/allocation/validation excluded; end barrier included",
+  "stopping_tolerance": 5e-09,
+  "acceptance_true_residual": 1e-08,
+  "repeats": 3,
+  "warmups": 1,
+  "selection": "minimum entire row; all samples retained",
+  "mpi": "HPC-X; explicit PBS host subset; ppr placement; rank-local physical-core pinning",
+  "source_hashes": {
+    "include/cg.hpp": "2d1e577779d597c255129e11c84f6776de66186da26c693ef67f243e766c3457",
+    "include/grid.hpp": "a254dbe961fcb662eccf0c4e7e2a319516a36e009edcc0a9c860dbeba74434d5",
+    "include/problem.hpp": "f7a64547ddd0f9fe7e0020514b3cf8edb4c0d5a5595ee59f8b4d24a0aa539860",
+    "include/csv.hpp": "b1cb595627dd43dfb952877a4ff0c0433acd879e34768f23bc0e822e185b2031",
+    "include/timer.hpp": "7aee2b94b866fcfc0d5fd9a1402f1fc589997239f3c5e9373a09d4c6f5928fb7",
+    "include/params.hpp": "53864b870fcac3d8630be60527108c4389a83663896ebc08bc0ac377176cd216",
+    "src/common/cg.cpp": "2e238219cd94b50f6f1db67dbdb0feb34fc153bfa180ed1b21504a8c653cbb0a",
+    "src/common/csv.cpp": "7fd3f8e27383bf6fa361725be9a1585f50601f616d92bd7bea23bd759e703360",
+    "src/common/grid.cpp": "6bbc297a295855095b573b91a310531fedd5f16d7130ffa97ea02d609a100929",
+    "src/common/params.cpp": "978fe68b59f6289aae46928792f77107e6563d1c1bcaa2ee146ddc35ea31ba21",
+    "src/mpi/mpi_backend.cpp": "7863d1051a2c3c8a583c3fdd3f9ae2097ced9f80fb01adfc638ee7f88044d41f",
+    "src/mpi/halo.cpp": "5771b2d8beb8d6efaa4684c4524a0f892deb1976b2559823235f1d99278f5a80",
+    "src/mpi/decomp.cpp": "af473002958284126da16152f9d5e3c48142161f96fa8bb54b36ef6a6cae600a",
+    "src/mpi/halo.hpp": "a3cde538e2b3fed905a3d5e0c80e31f6074a65bdde47eaa10b37490015fa5df2",
+    "src/mpi/mpi_backend.hpp": "72469da9041c47239be1db60b894f1b934a9165f81261422458b418f702119d8",
+    "src/mpi/decomp.hpp": "614133f86a961f252ff0ba00b6c3ce96f23c26605cd1e0932a38f9bbd4bc0551",
+    "src/serial/serial_backend.hpp": "c5d3885207540f4bf24713a91c210ee106bf57da093bdf1acfcc789e7eef69a0",
+    "src/serial/serial_backend.cpp": "09db6a5cce5c81aad5ba69e2a69d4f83b75ba1f17ffdd9b83e8a9b5b05b7505f",
+    "src/hybrid_omp/omp_backend.hpp": "383a4a0f2cbf8f10113e5f32991656fe428a5eccc4adafaced70be679b3f0095",
+    "src/hybrid_omp/omp_backend.cpp": "488ef9628430ad12bed62ec647d3b50c1a4fa5468cbc8204e7bde28f0b6a3a7e",
+    "src/hybrid_omp/domain.hpp": "00bf9db3dafa9045867f31c0d01361503482b6a096742fe457ec9d70699075cd",
+    "src/hybrid_omp/local.hpp": "b51c4ba207cc72775d099921655000d301737f7a43958cb8b75442873a8946db",
+    "scripts/run_cpu_scaling.py": "ccdcfee3f2510bffb55b03a1d7c65479cf5862eb31d02e99226253d8fe874301",
+    "scripts/vanda/pin_rank.py": "dd008eaa54675cb5f7fd71139aa7e1796e037451df8cffed7201a5903f9d1f1e"
+  },
+  "binary_hashes": {
+    "serial": "2a3794f98abf4ec5e215474dd20b00a18fbd585f22625e1d34f0315f6e3cca73",
+    "mpi": "22545233f3a82251576a3e46f22ce0f036beed56e6b479125a96c546a45ea015",
+    "omp": "3d9df540608e755c590c5827764115f7b341a1764d3b34224198b8ada81db294"
+  }
+}

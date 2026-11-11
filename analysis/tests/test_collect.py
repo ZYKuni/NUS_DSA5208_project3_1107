@@ -136,6 +136,62 @@ class CollectorTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unapproved partial suite"):
             c.read_input(ROOT/"results", spec)
 
+    def gpu_fixture(self):
+        rows = []
+        for mode, times in [("staged", [10., 6.]), ("device", [20., 8.])]:
+            for count, seconds in zip([1, 2], times):
+                rows.append(dict(job_id="synthetic-test-only", group=f"{mode}-{count}",
+                                 experiment="strong", impl="cuda", dim=2, n=2048,
+                                 ranks=count, threads=1, gpus=count, nodes=count,
+                                 decomp="cart", halo="block", cg="std", transport=mode,
+                                 iters=95, t_total=seconds, t_stencil=seconds*.4,
+                                 t_halo=seconds*.2, t_reduce=seconds*.5,
+                                 seconds_min=seconds, seconds_median=seconds*1.1,
+                                 seconds_max=seconds*1.2))
+        return pd.DataFrame(rows)
+
+    def test_gpu_baseline_isolated_by_transport(self):
+        df = c.derive(self.gpu_fixture())
+        staged = c.one(df, transport="staged", gpus=2)
+        device = c.one(df, transport="device", gpus=2)
+        self.assertAlmostEqual(staged.gpu_speedup, 10/6)
+        self.assertAlmostEqual(device.gpu_speedup, 20/8)
+        self.assertAlmostEqual(device.gpu_efficiency, (20/8)/2)
+        self.assertAlmostEqual(device.staged_over_transport, 6/8)
+        self.assertNotIn("efficiency", df.columns)
+
+    def test_missing_gpu_transport_baseline_is_rejected(self):
+        frame = self.gpu_fixture()
+        frame = frame[~((frame.transport == "device") & (frame.gpus == 1))]
+        with self.assertRaisesRegex(ValueError, "baseline must be unique"):
+            c.derive(frame)
+
+    def test_gpu_coverage_requires_both_dimensions_modes_and_counts(self):
+        partial = pd.concat([self.derived, c.derive(self.gpu_fixture())], ignore_index=True)
+        status = c.coverage(partial)
+        self.assertEqual(status["gpu_status"], "partial")
+        self.assertEqual(len(status["missing_gpu_configurations"]), 4)
+        self.assertFalse(status["task3_complete"])
+
+    def test_default_selection_matches_combined_cpu_manifest(self):
+        with tempfile.TemporaryDirectory() as folder:
+            result = Path(folder)
+            for spec in self.config["inputs"]:
+                for suffix in spec["sha256"]:
+                    name = spec["prefix"]+"_"+suffix
+                    target = result/name
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(ROOT/"results"/name, target)
+            df = c.collect(result, ROOT/"analysis/datasets.json")
+            combined = pd.read_csv(ROOT/"results/benchmarks/step3/cpu_combined_summary.csv")
+            expected = combined[combined.experiment != "preflight"]
+            actual = df[df.job_id.isin(combined.job_id)]
+            self.assertEqual(set(zip(actual.job_id,actual.group)), set(zip(expected.job_id,expected.group)))
+            self.assertEqual(len(actual), 85)
+            weak = actual[(actual.experiment=="weak") & (actual.dim==3)]
+            self.assertEqual(weak.job_id.nunique(), 1)
+            self.assertEqual(set(weak.ranks), {1,8,64,216,256})
+
 
 if __name__ == "__main__":
     unittest.main()

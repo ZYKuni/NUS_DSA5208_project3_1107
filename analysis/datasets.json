@@ -1,15 +1,36 @@
 {
-  "dataset": "vanda-step3-audited-cpu",
+  "dataset": "vanda-step3-audited-cpu-and-gpu",
   "inputs": [
     {
       "prefix": "benchmarks/step3/cpu_main",
       "allow_documented_partial": true,
-      "exclude_groups": [],
+      "exclude_groups": [
+        "serial-serial-3d-n202-p1-t1-cart-block-std",
+        "weak-mpi-3d-n32-p1-t1-cart-block-std",
+        "weak-mpi-3d-n64-p8-t1-cart-block-std",
+        "weak-mpi-3d-n128-p64-t1-cart-block-std",
+        "weak-mpi-3d-n192-p216-t1-cart-block-std"
+      ],
       "sha256": {
         "samples.csv": "45f5619822183f9c46f2001d289265378d3f8434e649a42d236a735fecb3edd2",
         "summary.csv": "72c1f085f92dded1efb3fd82e71cd304174b7ffe0459b93d8b4980b9c45b855b",
         "manifest.json": "52682f426c39bf77e17740ff7ff44cba0caa424ba28c69f25fe95c41258ebfe4",
         "audit.json": "3a8bcd35849b8b3eb1c25a3c2d02c0d824c26c5a012a805db213032ba29f05ab"
+      }
+    },
+    {
+      "prefix": "benchmarks/step3/cpu_weak3d",
+      "exclude_groups": [
+        "serial-serial-3d-n32-p1-t1-cart-block-std",
+        "serial-serial-3d-n64-p1-t1-cart-block-std",
+        "serial-serial-3d-n128-p1-t1-cart-block-std",
+        "serial-serial-3d-n192-p1-t1-cart-block-std"
+      ],
+      "sha256": {
+        "samples.csv": "87e60b7ec3258365c2676ebbb25b4d5ccb130991056be095270320eb4d025f4e",
+        "summary.csv": "f19f7cca351df4401e530ede1cc2783910c53c5150599423d9aec6cb8ee95b1d",
+        "manifest.json": "21552b8872a594a8a912e7af8a77d1852cbbeae88641964a47f6f6ba65a5895f",
+        "audit.json": "c7f9c182a8f3c1acec5082df2506513d199ab32256a6710e50b792bcbbbd140f"
       }
     }
   ],

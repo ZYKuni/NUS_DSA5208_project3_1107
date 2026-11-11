@@ -42,7 +42,8 @@ def core_axis(ax, ticks=(1, 4, 16, 64, 288), label="Physical CPU cores"):
 def band(ax, g, x, label, color, metric="seconds", center=None, scale=1):
     g = g.sort_values(x)
     require(not g[x].duplicated().any(), f"multiple configurations at the same {x}: {label}")
-    if metric in ["speedup", "efficiency", "weak_solve_ratio", "weak_iteration_ratio", "matched_mpi_ratio"]:
+    if metric in ["speedup", "efficiency", "weak_solve_ratio", "weak_iteration_ratio", "matched_mpi_ratio",
+                  "gpu_speedup", "gpu_efficiency", "staged_over_transport"]:
         lo, med, hi = metric+"_low", metric+"_median", metric+"_high"
         center = center or metric
     else:
@@ -54,17 +55,17 @@ def band(ax, g, x, label, color, metric="seconds", center=None, scale=1):
 
 
 class Figures:
-    def __init__(self, results, record):
-        self.results, self.record = results, record
+    def __init__(self, results, record, data):
+        self.results, self.record, self.data = results, record, data
         self.out = results/"figures"
         self.out.mkdir(parents=True, exist_ok=True)
-        self.book = PdfPages(self.out/"scaling_figures.pdf", metadata={"Title": "Vanda CPU scaling - audited measurements",
+        self.book = PdfPages(self.out/"scaling_figures.pdf", metadata={"Title": "Vanda parallel scaling - audited measurements",
                               "Author": "DSA5208 project team", "CreationDate": None, "ModDate": None})
         self.index = []
 
-    def save(self, fig, name, title, caption, groups):
+    def save(self, fig, name, title, caption, groups, platform_label="CPU"):
         fig.suptitle(title, x=.07, ha="left", y=.97, fontsize=15, fontweight="bold", color="#19384A")
-        fig.text(.07, .91, "Vanda | audited CPU measurements | 3 independent runs per configuration", fontsize=9, color="#526673")
+        fig.text(.07, .91, f"Vanda | audited {platform_label} measurements | 3 independent runs per configuration", fontsize=9, color="#526673")
         fig.text(.07, .035, caption, fontsize=8, color="#465B68", va="bottom")
         fig.subplots_adjust(left=.08, right=.98, top=.80, bottom=.22, wspace=.32, hspace=.45)
         if len(fig.axes) == 4:
@@ -72,7 +73,9 @@ class Figures:
         fig.savefig(self.out/(name+".pdf"), metadata={"CreationDate": None, "ModDate": None})
         fig.savefig(self.out/(name+".png"), dpi=170)
         self.book.savefig(fig)
-        self.index.append(dict(name=name, title=title, caption=caption, groups=sorted(set(groups)),
+        group_ids = sorted(set(groups))
+        jobs = sorted(self.data.loc[self.data["group"].isin(group_ids), "job_id"].unique())
+        self.index.append(dict(name=name, title=title, caption=caption, groups=group_ids, jobs=jobs,
                                pdf_sha256=sha256(self.out/(name+".pdf")),
                                png_sha256=sha256(self.out/(name+".png"))))
         plt.close(fig)
@@ -86,7 +89,8 @@ class Figures:
                    plotter_sha256=sha256(__file__), coverage=self.record["coverage"],
                    versions=dict(python=platform.python_version(), matplotlib=matplotlib.__version__,
                                  pandas=pd.__version__, numpy=np.__version__),
-                   skipped=[dict(figure="gpu_scaling", reason="No accepted GPU measurements")]))
+                   skipped=([dict(figure="gpu_scaling", reason="No accepted GPU measurements")]
+                            if self.record["coverage"]["accepted_gpu_groups"] == 0 else [])))
 
 
 def serial_figures(df, output):
@@ -101,8 +105,11 @@ def serial_figures(df, output):
         ax.grid(True, which="major", alpha=.16); ax.legend()
     axes[0].set_ylabel("CG solve time (s)"); axes[1].set_ylabel("CG iterations")
     axes[0].set_title("Runtime vs problem size"); axes[1].set_title("Iteration growth is included in runtime")
+    source_note = ("All serial sweep meshes retained, including the unused n=202 reference."
+                   if 202 in s["n"].values else
+                   "The n=203 serial reference is from the weak-scaling supplement; source allocations are retained in the tables.")
     output.save(fig, "serial_scaling", "Serial scaling: runtime and iteration count",
-                RUNTIME_NOTE+"\nAll serial sweep meshes retained, including the unused n=202 reference.", s["group"])
+                RUNTIME_NOTE+"\n"+source_note, s["group"])
 
     fig, ax = plt.subplots(figsize=(8, 4.8))
     for color, (dim, g) in zip(COLORS, s.groupby("dim")):
@@ -173,8 +180,13 @@ def weak_figures(df, output):
         if missing:
             a.axvline(256, color="#9B6861", linestyle=":", lw=1)
             a.text(.03, .95, "P=256: missing", transform=a.transAxes, ha="left", va="top", color="#9B4032", fontsize=9)
-        note = ("3D curve ends at 216 cores; the planned 256-core point is absent and is not interpolated." if missing
-                else "2D owned points/core are exactly constant at 16384 through 256 cores.")
+        if missing:
+            note = "3D curve ends at 216 cores; the planned 256-core point is absent and is not interpolated."
+        elif dim == 2:
+            note = "2D owned points/core are exactly constant at 16384 through 256 cores."
+        else:
+            endpoint = g[g["cores"] == 256].iloc[0]
+            note = f"3D n={int(endpoint.n)} at 256 cores gives {endpoint.points_per_core:.3f} points/core (-0.276% vs the base)."
         output.save(fig, f"weak_{dim}d", f"{dim}D weak scaling" + (" | incomplete endpoint" if missing else " | through 256 physical cores"),
                     RUNTIME_NOTE+"\n"+note+"\nWhole-solve time includes iteration growth; per-iteration ratios isolate average iteration cost.", g["group"])
 
@@ -216,6 +228,29 @@ def hybrid_figures(df, output):
                     RUNTIME_NOTE+"\nMPI ranks x threads: 288x1, 144x2, 72x4, 32x9, 16x18, 4x72. Ratio is not a strong-scaling efficiency.", g["group"])
 
 
+def gpu_figures(df, output):
+    gpu = df[(df["impl"] == "cuda") & (df["experiment"] == "strong")]
+    for (dim, n), g in gpu.groupby(["dim", "n"]):
+        require(g["job_id"].nunique() == 1, "select one allocation per GPU comparison")
+        fig, axes = plt.subplots(1, 3, figsize=(12, 4.8))
+        for color, (mode, v) in zip(COLORS, g.groupby("transport")):
+            for ax, metric in zip(axes, ["seconds", "gpu_speedup", "gpu_efficiency"]):
+                band(ax, v, "gpus", mode, color, metric, scale=100 if metric == "gpu_efficiency" else 1)
+        for ax in axes:
+            core_axis(ax, ticks=[1, 2], label="GPUs used (one per host)")
+            ax.set_xlim(.9, 2.2); ax.legend()
+        axes[0].set_yscale("log"); axes[0].set_ylabel("CG solve time (s)"); axes[0].set_title("Whole-solve runtime")
+        axes[1].plot([1, 2], [1, 2], "--", color="#7A858B", label="Ideal")
+        axes[1].set_ylabel("Speedup T_GPU(1) / T_GPU(G)"); axes[1].set_title("Same-transport baseline")
+        axes[1].legend()
+        axes[2].axhline(100, linestyle="--", color="#7A858B")
+        axes[2].set_ylabel("GPU parallel efficiency (%)"); axes[2].set_ylim(bottom=0)
+        axes[2].set_title("Efficiency (not clipped at 100%)")
+        output.save(fig, f"gpu_{dim}d_n{n}", f"{dim}D MPI + CUDA | n={n} | one versus two GPUs",
+                    RUNTIME_NOTE+"\nEach transport uses its own one-GPU baseline in the same allocation. Device-pointer MPI over TCP may internally stage.",
+                    g["group"], platform_label="GPU")
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("results_dir", nargs="?", type=Path, default=ROOT/"results")
@@ -225,8 +260,8 @@ def main():
         require(sha256(a.results_dir/name) == checksum, f"unverified analysis input: {name}")
     df = pd.read_csv(a.results_dir/"all.csv", keep_default_na=False, na_values=[""])
     require(not df["experiment"].isin(["preflight", "pilot"]).any(), "preflight in performance plots")
-    output = Figures(a.results_dir, record)
-    for make in [serial_figures, strong_figures, weak_figures, variant_figures, hybrid_figures]:
+    output = Figures(a.results_dir, record, df)
+    for make in [serial_figures, strong_figures, weak_figures, variant_figures, hybrid_figures, gpu_figures]:
         make(df, output)
     output.finish()
     print(f"Generated {len(output.index)} figures and scaling_figures.pdf in {output.out}")
